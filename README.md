@@ -1,39 +1,84 @@
-# EduRAG：基于 RAG 的课程资料智能问答系统
+# Cloud BigData RAG Assistant
 
-本项目是《云计算与大数据应用开发》课程大作业，目标是开发一个基于 RAG 的课程资料智能问答系统。系统支持课程资料上传、文本解析、知识库构建、向量检索、智能问答、来源引用、问答日志和可视化展示。
+EduRAG is a course-material question answering system for cloud computing and big data coursework. The project builds a complete RAG workflow: document upload, parsing, chunking, embedding, FAISS retrieval, LLM answering, source citation, logs, charts, Docker deployment, and public cloud access.
 
-## 当前阶段
+## Tech Stack
 
-当前处于项目计划书与协作机制设计阶段，尚未正式进入代码开发阶段。
+- Frontend: React, Vite, Ant Design, ECharts, Axios, React Router
+- Backend: FastAPI, Uvicorn, Pydantic, SQLAlchemy, Alembic
+- Database: SQLite for development, PostgreSQL for deployment
+- RAG: LangChain, FAISS, bge-small-zh-v1.5 embedding
+- LLM: DeepSeek API or Qwen API
+- Deployment: Docker, Docker Compose, Nginx, cloud server
 
-当前重点：
-- 完成项目计划书
-- 明确五人分工
-- 确认技术架构
-- 建立 GitHub 协作规则
-- 整理后续开发任务
+## Team Responsibilities
 
-## 小组分工
+| Member | Main Role | Code Area | Non-code Deliverables |
+| --- | --- | --- | --- |
+| A | Leader, backend architecture, integration, deployment | `backend/`, `nginx/`, `docker-compose.yml` | README, deployment guide, acceptance records, report/PPT integration |
+| B | Data processing | `rag/document_loader.py`, `rag/text_splitter.py`, `data/`, `uploads/` | `docs/data_processing.md`, sample data list |
+| C | Embedding, FAISS, retrieval | `rag/embedding.py`, `rag/vector_store.py`, `rag/retriever.py`, `vector_store/` | `docs/vector_db_test.md`, retrieval test table |
+| D | RAG QA and LLM adapter | `rag/llm_client.py`, `rag/qa_chain.py` | `docs/rag_design.md`, QA case library |
+| E | Frontend GUI, visualization, testing | `frontend/` | `docs/test_report.md`, screenshots, demo video |
 
-| 成员 | 角色 | 主要任务 |
-|---|---|---|
-| A | 组长 / 后端架构 / 集成部署 | 后端骨架、数据库、Docker、Nginx、整合验收、报告与 PPT 统筹 |
-| B | 数据处理负责人 | 文件解析、文本清洗、文本切片、数据清单 |
-| C | 向量检索负责人 | Embedding、FAISS、Top-K 检索、向量库测试 |
-| D | RAG 问答负责人 | Prompt、LLM 调用、RAG 问答链、来源引用 |
-| E | 前端 GUI / 可视化 / 测试负责人 | React 页面、移动端适配、ECharts、截图与测试记录 |
+## Directory Map
 
-## GitHub 协作方式
+```text
+backend/          FastAPI backend, database models, API routes, logs, stats
+frontend/         React GUI, upload page, knowledge base page, chat page, charts
+rag/              Document loading, chunking, embedding, FAISS, retriever, QA chain
+data/             Raw samples, FAQ, manually curated course materials
+uploads/          Runtime upload directories: raw, processed, temp
+vector_store/     FAISS index and vector database artifacts
+scripts/          Index build, demo data seed, release export scripts
+nginx/            Nginx reverse proxy configuration
+docs/             API design, reports, test docs, acceptance records, screenshots
+.github/          Issue and pull request templates
+```
 
-- README：项目总说明
-- docs：保存计划书、分工、架构、验收记录
-- Issues：分配任务和记录问题
-- Projects：管理任务进度
-- Branch / PR：代码阶段再启用
+## Branch Rules
 
-## 当前不做的事
+- `main`: stable submission branch.
+- `dev`: daily integration branch.
+- `feature/backend-api`: A, backend API and database.
+- `feature/data-processing`: B, parsing, cleaning, chunking.
+- `feature/vector-db`: C, embedding, FAISS, retrieval.
+- `feature/rag-qa`: D, prompt, LLM adapter, QA chain.
+- `feature/frontend-ui`: E, frontend pages and visualization.
+- `deploy/docker-nginx`: A, Docker, Nginx, cloud deployment.
+- `docs/report-ppt`: A leads, all members contribute report/PPT/screenshots.
 
-- 暂不正式开发代码
-- 暂不频繁合并分支
-- 暂不追求完整部署
-- 先完成计划书、任务拆分和协作流程
+All feature branches should open pull requests into `dev`. A performs final acceptance before merging to `main`.
+
+## Stage Acceptance Plan
+
+| Date | Acceptance | Core Standard |
+| --- | --- | --- |
+| 2026-06-14 | First integration | Upload -> parse -> chunk works; backend docs and frontend skeleton exist |
+| 2026-06-19 | Second integration | Upload -> parse -> chunk -> embedding -> FAISS -> RAG -> frontend -> logs works |
+| 2026-06-22 | Release candidate | Cloud URL, Docker release, final screenshots, report/PPT, demo video are frozen |
+
+## Local Development
+
+Backend placeholder:
+
+```powershell
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+Frontend placeholder:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Docker placeholder:
+
+```powershell
+docker compose up -d
+```
+
