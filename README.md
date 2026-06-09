@@ -39,6 +39,20 @@ Contract rules:
 - API responses must use `{ success, data, message, error_code }`.
 - Any PR that changes interface fields must update both `docs/module_contracts.md` and `docs/api_design.md`.
 
+## Owner Reference Docs
+
+| Owner | Start here |
+| --- | --- |
+| A | `docs/backend_api_guidelines.md` |
+| B | `docs/data_processing.md` |
+| C | `docs/vector_db_test.md` |
+| D | `docs/rag_design.md` |
+| E | `docs/test_report.md` |
+
+All owners must also follow `docs/module_contracts.md`.
+
+Stage 1 execution order and dependency rules are documented in `docs/stage1_execution_order.md`.
+
 ## Team Responsibilities
 
 | Member | Main Role | Code Area | Non-code Deliverables |

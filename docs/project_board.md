@@ -23,3 +23,27 @@
 | `deploy/docker-nginx` | A | Docker, Nginx, cloud deployment |
 | `docs/report-ppt` | A + all | Report, PPT, screenshots, acceptance records |
 
+## Owner Reference Docs
+
+| Owner | Required docs |
+| --- | --- |
+| A | `docs/backend_api_guidelines.md`, `docs/module_contracts.md`, `docs/api_design.md`, `docs/deployment_guide.md`, `docs/acceptance/` |
+| B | `docs/module_contracts.md`, `docs/data_processing.md` |
+| C | `docs/module_contracts.md`, `docs/vector_db_test.md` |
+| D | `docs/module_contracts.md`, `docs/rag_design.md` |
+| E | `docs/module_contracts.md`, `docs/test_report.md`, `docs/api_design.md` |
+
+## Execution Order
+
+Stage 1 task dependency order is documented in `docs/stage1_execution_order.md`.
+
+Short version:
+
+```text
+A locks backend/API placeholders
+  -> B produces Chunk[]
+  -> C produces RetrievedChunk[]
+  -> D produces ChatAnswer
+  -> E displays API/contract data
+  -> A records 6/14 acceptance
+```
