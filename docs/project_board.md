@@ -37,6 +37,13 @@
 
 Stage 1 task dependency order is documented in `docs/stage1_execution_order.md`.
 
+All pull requests and handoffs must also follow:
+
+```text
+docs/contribution_rules.md
+docs/handoff_protocol.md
+```
+
 Short version:
 
 ```text

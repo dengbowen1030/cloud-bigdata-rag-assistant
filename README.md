@@ -53,6 +53,13 @@ All owners must also follow `docs/module_contracts.md`.
 
 Stage 1 execution order and dependency rules are documented in `docs/stage1_execution_order.md`.
 
+Collaboration rules and handoff requirements are documented in:
+
+```text
+docs/contribution_rules.md
+docs/handoff_protocol.md
+```
+
 ## Team Responsibilities
 
 | Member | Main Role | Code Area | Non-code Deliverables |

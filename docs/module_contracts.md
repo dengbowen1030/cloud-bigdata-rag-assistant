@@ -2,6 +2,39 @@
 
 This document is the source of truth for EduRAG module boundaries, data formats, API responses, and field naming rules. Any pull request that changes an interface, field name, response shape, or cross-module data format must update this file and `docs/api_design.md` before code is merged.
 
+## Contract Change Process
+
+Contract fields are not frozen forever, but private changes are forbidden.
+
+Any change to these items must be documented in the same PR:
+
+```text
+object fields
+API request fields
+API response shape
+error codes
+module handoff data
+```
+
+Required PR statement:
+
+```text
+Contract changed: yes
+Changed contract:
+Affected owners:
+Docs updated:
+Migration or compatibility note:
+```
+
+Required docs:
+
+```text
+docs/module_contracts.md
+docs/api_design.md
+```
+
+A should reject PRs that change contracts without this documentation.
+
 ## Fixed Technical Framework
 
 | Layer | Framework / Tool |
@@ -227,6 +260,25 @@ Used by logs and stats pages.
 }
 ```
 
+### Stats
+
+Used by the frontend dashboard page and `GET /stats`.
+
+```json
+{
+  "document_count": 10,
+  "chunk_count": 320,
+  "question_count": 45,
+  "latest_question_time": "2026-06-09T21:00:00"
+}
+```
+
+Rules:
+
+- Count fields must be numbers.
+- `latest_question_time` may be `null` when no question has been asked.
+- E must render this object without inventing display-only API fields.
+
 ## API Contracts
 
 ### `GET /health`
@@ -321,4 +373,3 @@ Used by the frontend dashboard page.
 - D passes when a question plus valid `RetrievedChunk[]` returns a valid `ChatAnswer`; no-source cases must refuse.
 - E passes when frontend pages render only from API contract fields and do not rely on temporary backend fields.
 - A rejects any PR that changes interface fields without updating this file and `docs/api_design.md`.
-
