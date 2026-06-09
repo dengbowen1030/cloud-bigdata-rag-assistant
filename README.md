@@ -4,12 +4,40 @@ EduRAG is a course-material question answering system for cloud computing and bi
 
 ## Tech Stack
 
-- Frontend: React, Vite, Ant Design, ECharts, Axios, React Router
-- Backend: FastAPI, Uvicorn, Pydantic, SQLAlchemy, Alembic
+- Frontend framework: React + Vite + Ant Design
+- Backend framework: FastAPI
+- RAG orchestration: LangChain
+- Vector database: FAISS
+- Embedding model: bge-small-zh-v1.5
+- LLM API: DeepSeek API or Qwen API
 - Database: SQLite for development, PostgreSQL for deployment
-- RAG: LangChain, FAISS, bge-small-zh-v1.5 embedding
-- LLM: DeepSeek API or Qwen API
-- Deployment: Docker, Docker Compose, Nginx, cloud server
+- Deployment: Docker Compose + Nginx
+
+LangChain is used inside the RAG workflow only. The full application framework is React frontend + FastAPI backend + LangChain RAG orchestration + FAISS retrieval + DeepSeek/Qwen answer generation.
+
+## Module Interaction Contract
+
+All members must follow `docs/module_contracts.md` for data formats, API response shape, error codes, and cross-module boundaries.
+
+```text
+React frontend
+  -> FastAPI backend API
+  -> RAG modules
+  -> LangChain orchestration
+  -> FAISS retrieval
+  -> DeepSeek/Qwen answer generation
+  -> FastAPI log/stat persistence
+  -> React answer, source, and chart rendering
+```
+
+Contract rules:
+
+- Frontend code calls backend APIs only and must not import files under `rag/`.
+- B outputs `Chunk[]` to C.
+- C outputs `RetrievedChunk[]` to D.
+- D outputs `ChatAnswer` to A/E through backend APIs.
+- API responses must use `{ success, data, message, error_code }`.
+- Any PR that changes interface fields must update both `docs/module_contracts.md` and `docs/api_design.md`.
 
 ## Team Responsibilities
 
@@ -81,4 +109,3 @@ Docker placeholder:
 ```powershell
 docker compose up -d
 ```
-
