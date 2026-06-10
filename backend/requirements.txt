@@ -4,4 +4,4 @@ pydantic
 sqlalchemy
 alembic
 python-multipart
-
+httpx
