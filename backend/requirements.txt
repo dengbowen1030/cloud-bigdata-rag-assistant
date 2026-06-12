@@ -4,4 +4,7 @@ pydantic
 sqlalchemy
 alembic
 python-multipart
+numpy
+faiss-cpu
+sentence-transformers
 
