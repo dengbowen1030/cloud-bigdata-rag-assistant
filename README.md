@@ -130,3 +130,125 @@ Docker placeholder:
 ```powershell
 docker compose up -d
 ```
+
+## Frontend Premium UI Redesign and System Settings
+
+The frontend has been upgraded into a premium Apple macOS / Apple Intelligence inspired interface while keeping the existing React + Vite + Ant Design architecture and the original API contract-driven workflow.
+
+### Frontend UI Upgrade Goals
+
+The redesigned interface focuses on:
+
+- A modern Apple-style visual language with clean spacing, rounded cards, and soft hierarchy.
+- Glassmorphism panels using translucent backgrounds, high blur, subtle borders, and low-opacity shadows.
+- A premium AI product aesthetic based on soft mesh gradients, acrylic materials, and restrained visual accents.
+- A contract-safe frontend design that can run with mock data first and switch to real backend APIs later without changing page logic.
+- A professional SaaS-level presentation quality suitable for course project demos, integration acceptance, and final reporting.
+
+### Redesigned Frontend Pages
+
+| Page | Route | Upgrade Summary |
+| --- | --- | --- |
+| Upload Center | `/upload` | Premium drag-and-drop upload area, file type badges, upload status preview, and document object display. |
+| Knowledge Base Overview | `/knowledge-base` | Borderless glass table, document status tags, search/filter toolbar, and knowledge asset metric cards. |
+| Smart Chat Workspace | `/chat` | Split workspace for question input, answer rendering, source cards, local session memory, and no-source fallback state. |
+| QA Logs | `/logs` | Refined audit timeline showing questions, answers, model information, source count, and search/filter controls. |
+| Dashboard | `/dashboard` | Metric cards, quality gate panel, frontend integration timeline, and chart visualization. |
+
+### System Settings and Theme Selector Matrix
+
+The system settings button in the top header now opens a premium Apple-style settings modal. It provides a visual theme selector matrix and multiple personalization controls.
+
+Core files:
+
+```text
+frontend/src/components/SystemSettings.jsx
+frontend/src/settings/themeConfig.js
+frontend/src/layouts/MainLayout.jsx
+frontend/src/assets/styles.css
+```
+
+The settings panel supports:
+
+- Theme switching with a visual preview matrix.
+- Local persistence through `localStorage`.
+- Appearance mode selection: Auto, Light, and Dark.
+- Adjustable glass blur intensity.
+- Elegant motion toggle.
+- Compact layout toggle.
+- Search shortcut hint toggle.
+- Rounded corner style selection.
+- Reset to default settings.
+
+### Built-in Theme Matrix
+
+| Theme | Visual Direction | Best Use Case |
+| --- | --- | --- |
+| Aurora Intelligence | Deep aurora purple, cyber magenta, and muted pink gradients inspired by Apple Intelligence. | Daily AI RAG interaction and general product demonstration. |
+| Cupertino Classic | Clean Apple system white, restrained blue accents, and low-distraction layout. | Long document reading and contract field checking. |
+| Pro Space Gray | Dark acrylic panels, graphite background, and titanium-like highlights. | Night work, QA log review, and API integration debugging. |
+| Starlight Luxury | Warm starlight white, champagne gold, and soft premium shadows. | Dashboard presentation and final project showcase. |
+| Alpine Sage | Morandi green, sage accents, and calm knowledge-management styling. | Knowledge base management and chunk review. |
+
+### Frontend Contract-Safe Design
+
+The UI is intentionally separated from backend implementation details. Frontend pages only depend on stable API response fields and runtime validation.
+
+Important frontend behaviors:
+
+- Mock API mode can be used for frontend demonstration before backend integration is complete.
+- UI labels are localized into Chinese for end users.
+- Backend field names such as `document_count`, `chunk_count`, `question_count`, `processed`, and `uploaded` are rendered as readable Chinese labels.
+- Empty source responses are handled gracefully without page crashes.
+- Settings changes do not affect API contracts or data flow.
+
+### Screenshot Assets
+
+Recommended screenshot location:
+
+```text
+docs/screenshots/frontend/
+```
+
+Suggested screenshot mapping:
+
+```text
+docs/screenshots/frontend/1.png  Upload Center
+docs/screenshots/frontend/2.png  Knowledge Base Overview
+docs/screenshots/frontend/3.png  Smart Chat Workspace
+docs/screenshots/frontend/4.png  QA Logs
+docs/screenshots/frontend/5.png  Dashboard
+docs/screenshots/frontend/6.png  System Settings Theme Matrix
+```
+
+These screenshots can be used in the final report, PPT, and acceptance record to demonstrate the frontend redesign.
+
+### Frontend Verification
+
+Run the frontend locally:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Build verification:
+
+```powershell
+cd frontend
+npm run build
+```
+
+Acceptance checklist:
+
+- All five frontend pages are reachable from the sidebar.
+- The system settings button opens the settings modal.
+- Theme switching works immediately and persists after page refresh.
+- Mock API mode still renders upload, knowledge base, chat, logs, and dashboard data.
+- The layout remains responsive on common laptop and browser widths.
+- No frontend page depends on internal RAG module files.
+
+### Frontend Contribution Summary
+
+This frontend update improves EduRAG Pro from a basic admin-style interface into a polished AI knowledge assistant dashboard. It adds Apple-inspired visual quality, a complete theme personalization system, improved page hierarchy, refined mock-data presentation, and stronger demonstration value for integration and final project acceptance.
