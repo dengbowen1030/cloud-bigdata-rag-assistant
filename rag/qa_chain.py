@@ -11,7 +11,7 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from llm_client import get_llm_client, BaseLLMClient, LLMProviderUnavailableError
+from rag.llm_client import get_llm_client, BaseLLMClient, LLMProviderUnavailableError
 
 logger = logging.getLogger(__name__)
 

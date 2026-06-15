@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
 from app.api.schemas import Document
@@ -7,7 +7,7 @@ _documents: Dict[str, Document] = {}
 
 
 def _utc_now() -> str:
-    return datetime.utcnow().replace(microsecond=0).isoformat()
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
 def create_uploaded_document(filename: str, file_size: int, file_type: str) -> Document:
@@ -37,11 +37,10 @@ def rebuild_document(document_id: str) -> Optional[dict]:
     document = _documents.get(document_id)
     if document is None:
         return None
-    updated = document.copy(update={"status": "processed", "chunk_count": document.chunk_count})
+    updated = document.model_copy(update={"status": "processed", "chunk_count": document.chunk_count})
     _documents[document_id] = updated
     return {
         "document_id": document_id,
         "chunk_count": updated.chunk_count,
         "status": updated.status,
     }
-

@@ -5,6 +5,7 @@ sqlalchemy
 alembic
 python-multipart
 httpx
+requests
 pypdf
 python-docx
 numpy

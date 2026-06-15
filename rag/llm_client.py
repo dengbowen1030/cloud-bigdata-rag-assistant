@@ -180,7 +180,9 @@ class MockLLMClient(BaseLLMClient):
             if msg.get("role") == "user":
                 user_message = msg.get("content", "")
                 break
-
+        if "无法" in user_message or "NO_SOURCE" in user_message:
+            return "根据当前知识库，无法找到足够可靠的资料来回答该问题。"
+        return "这是开发阶段的模拟回答。请在配置 DeepSeek 或 Qwen API 后替换为真实模型输出。"
 
     def stream_chat(self, messages: list[dict], temperature: float = 0.7, max_tokens: int = 2048) -> Iterator[str]:
         response = self.chat(messages, temperature, max_tokens)

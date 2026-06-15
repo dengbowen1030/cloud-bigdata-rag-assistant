@@ -68,7 +68,7 @@ export function isStats(value) {
     hasNumber(value.document_count) &&
     hasNumber(value.chunk_count) &&
     hasNumber(value.question_count) &&
-    hasString(value.latest_question_time)
+    (value.latest_question_time === null || hasString(value.latest_question_time))
   );
 }
 

@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.api.schemas import ChatAnswer, ChatQuery
 
 
 def _utc_now() -> str:
-    return datetime.utcnow().replace(microsecond=0).isoformat()
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
 def answer_query(query: ChatQuery) -> ChatAnswer:
@@ -15,4 +15,3 @@ def answer_query(query: ChatQuery) -> ChatAnswer:
         model="deepseek",
         created_at=_utc_now(),
     )
-

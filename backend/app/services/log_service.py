@@ -1,11 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 from app.api.schemas import QaLog
 
 
 def _utc_now() -> str:
-    return datetime.utcnow().replace(microsecond=0).isoformat()
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
 def list_logs() -> List[QaLog]:
@@ -19,4 +19,3 @@ def list_logs() -> List[QaLog]:
             created_at=_utc_now(),
         )
     ]
-
