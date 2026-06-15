@@ -5,3 +5,5 @@ sqlalchemy
 alembic
 python-multipart
 httpx
+pypdf
+python-docx
