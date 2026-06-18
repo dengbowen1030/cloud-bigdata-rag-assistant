@@ -4,7 +4,11 @@ pydantic
 sqlalchemy
 alembic
 python-multipart
+python-dotenv
+httpx
+requests
+pypdf
+python-docx
 numpy
 faiss-cpu
 sentence-transformers
-

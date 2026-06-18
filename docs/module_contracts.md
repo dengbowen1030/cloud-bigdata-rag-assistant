@@ -65,6 +65,8 @@ React frontend
 
 Frontend code must call backend APIs only. It must not import or call files under `rag/`.
 
+Frontend UI may be redesigned, but it must keep the backend API contract unchanged. Detailed frontend constraints are documented in `docs/frontend_guidelines.md`.
+
 ## Ownership Boundaries
 
 | Owner | Scope | Main Outputs |
@@ -114,7 +116,7 @@ Failure response:
 
 | Error code | Meaning |
 | --- | --- |
-| `UPLOAD_FILE_TYPE_UNSUPPORTED` | Uploaded file type is not PDF, DOCX, TXT, or XLSX |
+| `UPLOAD_FILE_TYPE_UNSUPPORTED` | Uploaded file type is not PDF, DOCX, or TXT |
 | `UPLOAD_FILE_EMPTY` | Uploaded file is empty |
 | `DOCUMENT_NOT_FOUND` | `document_id` does not exist |
 | `DOCUMENT_PROCESSING_FAILED` | Parsing, cleaning, or splitting failed |
@@ -173,7 +175,7 @@ Rules:
 
 - `content` must not be empty.
 - `chunk_index` starts at `1` within each document.
-- `page` may be `null` for TXT or sources without page numbers.
+- `page` may be `null` for TXT, DOCX, or sources without page numbers.
 - `metadata.source` must match the original filename.
 
 ### RetrievedChunk
@@ -281,6 +283,13 @@ Rules:
 
 ## API Contracts
 
+Frontend integration rule:
+
+- `VITE_USE_MOCK=false` must call the real FastAPI backend.
+- `VITE_API_BASE_URL` must be the only frontend base URL configuration.
+- Frontend pages must render from the objects in this file and must not require temporary backend-only fields.
+- Backend failure envelopes must be shown to users through `message` or a readable mapped prompt.
+
 ### `GET /health`
 
 Returns backend health.
@@ -302,7 +311,7 @@ Input: `multipart/form-data`
 
 | Field | Required | Description |
 | --- | --- | --- |
-| `file` | Yes | PDF, DOCX, TXT, or XLSX course material |
+| `file` | Yes | PDF, DOCX, or TXT course material |
 
 Output: `Document`
 

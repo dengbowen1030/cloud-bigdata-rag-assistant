@@ -216,19 +216,19 @@ Embedding info:
 {
   "model_name": "BAAI/bge-small-zh-v1.5",
   "embedding_mode": "mock",
-  "vector_dimension": 384
+  "vector_dimension": 512
 }
 ```
 
-5 sample vector heads:
+5 sample vector heads from the old Stage 1 mock sample. The full vector is not listed; mock and real BGE paths now use 512 dimensions.
 
 | chunk_id | vector_dim | first 8 values |
 | --- | --- | --- |
-| `chunk_doc_001_0001` | 384 | `[0.163512, 0.0, 0.0, -0.021257, 0.0, -0.048399, 0.0, 0.0]` |
-| `chunk_doc_001_0002` | 384 | `[-0.046562, 0.0, 0.0, 0.021618, 0.094454, -0.046562, 0.0, 0.0]` |
-| `chunk_doc_002_0001` | 384 | `[0.055464, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.144749]` |
-| `chunk_doc_003_0001` | 384 | `[0.020568, 0.0, 0.0, 0.133693, 0.0, 0.0, 0.0, 0.019661]` |
-| `chunk_doc_004_0001` | 384 | `[0.046219, 0.0, 0.0, 0.089057, 0.021419, 0.0, 0.092439, 0.0]` |
+| `chunk_doc_001_0001` | 512 | `[0.163512, 0.0, 0.0, -0.021257, 0.0, -0.048399, 0.0, 0.0]` |
+| `chunk_doc_001_0002` | 512 | `[-0.046562, 0.0, 0.0, 0.021618, 0.094454, -0.046562, 0.0, 0.0]` |
+| `chunk_doc_002_0001` | 512 | `[0.055464, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.144749]` |
+| `chunk_doc_003_0001` | 512 | `[0.020568, 0.0, 0.0, 0.133693, 0.0, 0.0, 0.0, 0.019661]` |
+| `chunk_doc_004_0001` | 512 | `[0.046219, 0.0, 0.0, 0.089057, 0.021419, 0.0, 0.092439, 0.0]` |
 
 ## FAISS Save Evidence
 
@@ -237,7 +237,7 @@ Save result:
 ```json
 {
   "chunk_count": 5,
-  "vector_dimension": 384,
+  "vector_dimension": 512,
   "model_name": "BAAI/bge-small-zh-v1.5",
   "embedding_mode": "mock",
   "index_path": "vector_store/faiss_index/index.faiss",
@@ -261,7 +261,7 @@ Reload result:
 ```json
 {
   "chunk_count": 5,
-  "vector_dimension": 384,
+  "vector_dimension": 512,
   "model_name": "BAAI/bge-small-zh-v1.5",
   "embedding_mode": "mock",
   "index_path": "vector_store/faiss_index/index.faiss",

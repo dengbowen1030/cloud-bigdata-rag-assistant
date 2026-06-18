@@ -1,5 +1,7 @@
 # API Design Draft
 
+本文档记录后端 API 路径、请求字段、响应字段和错误码。前端可以调整 UI，但不能私自修改本文档列出的 API 路径和字段。
+
 ## Backend Owner
 
 A owns backend API design and interface changes. Any field change must be recorded here before frontend integration.
@@ -44,6 +46,37 @@ React frontend
 | POST | `/chat/query` | D+A | Ask a RAG question | 6/17 |
 | GET | `/logs` | A+E | Query QA logs | 6/17 |
 | GET | `/stats` | A+E | Dashboard statistics | 6/18 |
+
+## Frontend API Usage Rules
+
+前端必须通过 `frontend/src/api/` 下的封装调用后端接口。当前真实联调模式为：
+
+```text
+VITE_USE_MOCK=false
+VITE_API_BASE_URL=http://127.0.0.1:8000
+```
+
+前端 UI 可以改版，但以下内容不能私自改：
+
+- API 路径。
+- API 请求字段。
+- API 响应 envelope。
+- `Document`、`ChatAnswer`、`RetrievedChunk`、`QaLog`、`Stats` 字段名。
+- 上传文件类型限制：只允许 PDF、DOCX、TXT。
+
+当前前端封装必须保持：
+
+| Function | Endpoint |
+| --- | --- |
+| `uploadDocument(file)` | `POST /upload` |
+| `getDocuments()` | `GET /documents` |
+| `deleteDocument(document_id)` | `DELETE /documents/{document_id}` |
+| `rebuildDocument(document_id)` | `POST /documents/{document_id}/rebuild` |
+| `queryChat({ question, top_k })` | `POST /chat/query` |
+| `getLogs()` | `GET /logs` |
+| `getStats()` | `GET /stats` |
+
+如果后端返回 `success=false`，前端必须展示 `message` 或明确的友好提示，不能只显示 `Network Error`。
 
 ## Response Shape
 
@@ -90,7 +123,8 @@ Returns backend health.
 
 - Input: `multipart/form-data`
 - Required field: `file`
-- Allowed file types: PDF, DOCX, TXT, XLSX
+- Allowed file types: PDF, DOCX, TXT
+- Not supported in Stage 2: XLSX, DOC, OCR-only scanned PDF, images, PPT/PPTX
 - Output: `Document`
 
 ### `GET /documents`
