@@ -8,11 +8,28 @@ import SourceCard from "../components/SourceCard";
 const { TextArea } = Input;
 const { Paragraph, Text } = Typography;
 
-const exampleQuestions = ["软件开发周期是什么？", "知识库页面应该展示哪些字段？", "当前知识库是否包含未上传资料的详细内容？"];
+const exampleQuestions = [
+  "云计算的五个基本特征是什么？",
+  "知识库页面应该展示哪些字段？",
+  "当前知识库是否包含未上传资料的详细内容？",
+];
+
+function getFailureMessage(response) {
+  if (response.error_code === "VECTOR_INDEX_NOT_READY") {
+    return "请先上传文档并重建索引。";
+  }
+  if (response.error_code === "QA_CHAIN_FAILED") {
+    return response.message || "本地 embedding 模型不可用，请检查 models/bge-small-zh-v1.5 或 RAG_EMBEDDING_MODEL_PATH。";
+  }
+  if (response.error_code === "LLM_PROVIDER_UNAVAILABLE") {
+    return response.message || "大模型服务暂不可用，请检查 LLM_PROVIDER 和对应 API Key。";
+  }
+  return response.message || "问答请求失败";
+}
 
 export default function Chat() {
   const { message } = App.useApp();
-  const [question, setQuestion] = useState("软件开发周期是什么？");
+  const [question, setQuestion] = useState("云计算的五个基本特征是什么？");
   const [topK, setTopK] = useState(5);
   const [answer, setAnswer] = useState(null);
   const [history, setHistory] = useState([]);
@@ -29,13 +46,16 @@ export default function Chat() {
       return;
     }
 
+    const safeTopK = Math.min(10, Math.max(1, Number(topK || 5)));
     setQuestion(trimmedQuestion);
+    setTopK(safeTopK);
     setLoading(true);
+
     try {
-      const response = await queryChat({ question: trimmedQuestion, top_k: topK });
+      const response = await queryChat({ question: trimmedQuestion, top_k: safeTopK });
 
       if (!response.success) {
-        message.error(response.message || "问答请求失败");
+        message.error(getFailureMessage(response));
         return;
       }
 
@@ -62,10 +82,9 @@ export default function Chat() {
         icon={APP_ICONS.chat}
         eyebrow="问答接口"
         title="智能问答工作台"
-        description="面向 D 负责的问答结果渲染页面，以专业智能工作台体验承载提问、回答、来源、模型与无来源稳定态。"
-        tags={["问答请求", "问答结果", "来源列表", "运行时契约校验"]}
+        description="调用 FastAPI 的 /chat/query，展示真实 answer、model、created_at 和 sources。"
+        tags={["真实 API", "ChatAnswer", "Sources", "Logs"]}
       />
-
 
       <Row gutter={[18, 18]} align="stretch">
         <Col xs={24} xl={9}>
@@ -144,11 +163,11 @@ export default function Chat() {
                 <div className="source-summary-strip">
                   <span><IconFont type={APP_ICONS.source} /> 来源数：{sources.length}</span>
                   <span><IconFont type={APP_ICONS.check} /> 高可信来源：{reliableSourceCount}</span>
-                  <span><IconFont type={APP_ICONS.shield} /> 可靠来源防护</span>
+                  <span><IconFont type={APP_ICONS.shield} /> 只基于来源回答</span>
                 </div>
               </Space>
             ) : (
-              <Empty description="请输入问题并发送，当前阶段会返回契约格式的模拟问答结果" />
+              <Empty description="请先上传文档、重建索引，然后输入问题并发送" />
             )}
           </Card>
         </Col>
@@ -160,7 +179,7 @@ export default function Chat() {
             {sources.length ? (
               <Space direction="vertical" size={12} className="full-width">
                 {sources.map((source) => (
-                  <SourceCard key={`${source.filename}-${source.page}-${source.chunk_index}`} source={source} />
+                  <SourceCard key={`${source.filename}-${source.page ?? "none"}-${source.chunk_index}`} source={source} />
                 ))}
               </Space>
             ) : (
@@ -169,11 +188,7 @@ export default function Chat() {
           </Card>
         </Col>
         <Col xs={24} xl={9}>
-          <Card title="会话记忆与快捷入口" className="glass-card" variant="borderless">
-            <Space direction="vertical" size={12} className="full-width" style={{ marginBottom: 16 }}>
-              <div className="premium-quick-card"><span className="premium-quick-card__icon"><IconFont type={APP_ICONS.history} /></span><div><Text strong>本地会话</Text><br /><Text type="secondary">仅保存本地最近 6 次问答。</Text></div></div>
-              <div className="premium-quick-card"><span className="premium-quick-card__icon"><IconFont type={APP_ICONS.noSource} /></span><div><Text strong>无来源保护</Text><br /><Text type="secondary">来源为空时优雅展示，不崩溃。</Text></div></div>
-            </Space>
+          <Card title="本地问答历史" className="glass-card" variant="borderless">
             {history.length ? (
               <Timeline
                 items={history.map((item) => {

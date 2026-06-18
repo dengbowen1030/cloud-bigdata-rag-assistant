@@ -28,15 +28,6 @@ export const mockDocuments = [
   },
   {
     document_id: "doc_004",
-    filename: "课程大纲.xlsx",
-    file_type: "xlsx",
-    file_size: 98654,
-    status: "failed",
-    chunk_count: 0,
-    created_at: "2026-06-10T10:30:00",
-  },
-  {
-    document_id: "doc_005",
     filename: "知识增强架构概览.pdf",
     file_type: "pdf",
     file_size: 312880,
@@ -45,7 +36,7 @@ export const mockDocuments = [
     created_at: "2026-06-11T08:40:00",
   },
   {
-    document_id: "doc_006",
+    document_id: "doc_005",
     filename: "团队验收计划.docx",
     file_type: "docx",
     file_size: 167990,
@@ -121,7 +112,7 @@ export const mockQaLogs = [
   },
   {
     log_id: "log_004",
-    question: "知识库页面应该展示哪些字段？",
+    question: "知识库页面应展示哪些字段？",
     answer: "知识库页至少展示文件名、文件类型、处理状态、切片数量、创建时间。",
     source_count: 2,
     model: "qwen",

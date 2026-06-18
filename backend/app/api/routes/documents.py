@@ -13,7 +13,7 @@ from app.utils.responses import failure_response, success_response
 
 router = APIRouter(tags=["documents"])
 
-ALLOWED_UPLOAD_SUFFIXES = {".pdf", ".docx", ".txt", ".xlsx"}
+ALLOWED_UPLOAD_SUFFIXES = {".pdf", ".docx", ".txt"}
 
 
 @router.post("/upload", response_model=ApiResponse)
@@ -21,7 +21,7 @@ async def upload_document(file: UploadFile = File(...)):
     suffix = Path(file.filename or "").suffix.lower()
     if suffix not in ALLOWED_UPLOAD_SUFFIXES:
         return failure_response(
-            "Unsupported file type. Allowed types: PDF, DOCX, TXT, XLSX.",
+            "Unsupported file type. Allowed types: PDF, DOCX, TXT.",
             "UPLOAD_FILE_TYPE_UNSUPPORTED",
         )
 
@@ -29,7 +29,7 @@ async def upload_document(file: UploadFile = File(...)):
     if not content:
         return failure_response("Uploaded file is empty.", "UPLOAD_FILE_EMPTY")
 
-    document = create_uploaded_document(file.filename or "unknown", len(content), suffix[1:])
+    document = create_uploaded_document(file.filename or "unknown", len(content), suffix[1:], content=content)
     return success_response(document)
 
 
@@ -48,7 +48,10 @@ def remove_document(document_id: str):
 
 @router.post("/documents/{document_id}/rebuild", response_model=ApiResponse)
 def rebuild_document_index(document_id: str):
-    rebuilt = rebuild_document(document_id)
+    try:
+        rebuilt = rebuild_document(document_id)
+    except Exception as exc:
+        return failure_response(str(exc), "DOCUMENT_PROCESSING_FAILED")
     if rebuilt is None:
         return failure_response("Document not found.", "DOCUMENT_NOT_FOUND")
     return success_response(rebuilt)

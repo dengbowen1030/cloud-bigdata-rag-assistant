@@ -46,6 +46,38 @@ export async function getDocuments() {
   return validateArrayEnvelope(response, isDocument, "Document");
 }
 
+export async function rebuildDocument(documentId) {
+  const response = USE_MOCK
+    ? await mockResolve({
+        document_id: documentId,
+        chunk_count: 12,
+        status: "processed",
+      })
+    : await request({
+        method: "post",
+        url: `/documents/${documentId}/rebuild`,
+      });
+
+  return validateDataEnvelope(
+    response,
+    (value) =>
+      value &&
+      typeof value.document_id === "string" &&
+      typeof value.chunk_count === "number" &&
+      typeof value.status === "string",
+    "RebuildResult",
+  );
+}
+
+export async function deleteDocument(documentId) {
+  return USE_MOCK
+    ? mockResolve({ document_id: documentId })
+    : request({
+        method: "delete",
+        url: `/documents/${documentId}`,
+      });
+}
+
 export function appendDocumentToList(documents, document) {
   return toSuccessEnvelope([document, ...documents]);
 }

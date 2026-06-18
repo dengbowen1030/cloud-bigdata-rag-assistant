@@ -1,10 +1,4 @@
-"""Embedding wrapper owned by member C.
-
-This module prefers the real ``bge-small-zh-v1.5`` model when it is already
-available locally. If the model cannot be loaded, it falls back to a
-deterministic mock embedding so Stage 1 can still build and verify the FAISS
-pipeline end to end.
-"""
+"""Embedding wrapper owned by member C."""
 
 from __future__ import annotations
 
@@ -13,14 +7,16 @@ import hashlib
 import importlib
 import os
 import re
+from pathlib import Path
 from typing import Any, Sequence
 
 import numpy as np
 
 
 DEFAULT_MODEL_NAME = "BAAI/bge-small-zh-v1.5"
-DEFAULT_VECTOR_DIMENSION = 384
+DEFAULT_VECTOR_DIMENSION = 512
 _TOKEN_PATTERN = re.compile(r"[A-Za-z0-9_]+", re.UNICODE)
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 @dataclass(slots=True)
@@ -48,7 +44,12 @@ class EmbeddingProvider:
         mode: str | None = None,
         vector_dimension: int = DEFAULT_VECTOR_DIMENSION,
     ) -> None:
-        self.model_name = model_name
+        raw_model_name = (
+            os.getenv("RAG_EMBEDDING_MODEL_PATH", model_name)
+            if model_name == DEFAULT_MODEL_NAME
+            else model_name
+        )
+        self.model_name = self._resolve_model_name(raw_model_name)
         self.mode = (mode or os.getenv("RAG_EMBEDDING_MODE", "mock")).lower()
         self.vector_dimension = vector_dimension
         self._model = None
@@ -116,10 +117,20 @@ class EmbeddingProvider:
             self._active_mode = "mock"
             return
 
+        local_only = os.getenv("RAG_EMBEDDING_DOWNLOAD", "0") != "1"
+        if local_only and not Path(self.model_name).exists():
+            if self.mode == "real":
+                raise FileNotFoundError(
+                    f"Embedding model not found at {self.model_name}. "
+                    "Set RAG_EMBEDDING_DOWNLOAD=1 to allow download, or place "
+                    "BAAI/bge-small-zh-v1.5 under models/bge-small-zh-v1.5."
+                )
+            self._active_mode = "mock"
+            return
+
         try:
             sentence_transformers = importlib.import_module("sentence_transformers")
             sentence_transformer_cls = getattr(sentence_transformers, "SentenceTransformer")
-            local_only = os.getenv("RAG_EMBEDDING_DOWNLOAD", "0") != "1"
             self._model = sentence_transformer_cls(
                 self.model_name,
                 local_files_only=local_only,
@@ -131,6 +142,24 @@ class EmbeddingProvider:
                 raise
             self._model = None
             self._active_mode = "mock"
+
+    def _resolve_model_name(self, model_name: str) -> str:
+        """Resolve local relative model paths from the repository root.
+
+        Hugging Face repo ids such as BAAI/bge-small-zh-v1.5 are preserved so
+        download-enabled runs can still use the normal hub identifier.
+        """
+
+        raw_value = str(model_name or DEFAULT_MODEL_NAME).strip()
+        path = Path(raw_value)
+        if path.is_absolute():
+            return str(path)
+
+        project_path = PROJECT_ROOT / path
+        if raw_value.startswith((".", "models/", "models\\", "model/", "model\\")) or project_path.exists():
+            return str(project_path)
+
+        return raw_value
 
     def _mock_embed_text(self, text: str) -> np.ndarray:
         vector = np.zeros(self.vector_dimension, dtype=np.float32)

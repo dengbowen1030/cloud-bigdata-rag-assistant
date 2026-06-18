@@ -11,8 +11,8 @@ export default function SourceCard({ source }) {
           image={<IconFont type={APP_ICONS.empty} className="empty-source-icon" />}
           description={
             <Space direction="vertical" size={4}>
-              <Text strong>当前知识库没有足够依据回答该问题</Text>
-              <Text type="secondary">来源为空时页面保持稳定，并明确提示无可靠依据。</Text>
+              <Text strong>当前没有可展示的来源</Text>
+              <Text type="secondary">请先上传文档并重建索引，或检查该问题是否能被知识库命中。</Text>
             </Space>
           }
         />
@@ -21,6 +21,7 @@ export default function SourceCard({ source }) {
   }
 
   const percent = Math.round((source.score || 0) * 100);
+  const pageLabel = source.page ?? "-";
 
   return (
     <Card className="source-card" size="small" variant="borderless">
@@ -33,7 +34,7 @@ export default function SourceCard({ source }) {
             <div>
               <Text strong>{source.filename}</Text>
               <div>
-                <Tag>页码：{source.page ?? "无"}</Tag>
+                <Tag>页码：{pageLabel}</Tag>
                 <Tag>切片：{source.chunk_index}</Tag>
               </div>
             </div>
@@ -46,7 +47,7 @@ export default function SourceCard({ source }) {
 
         <Descriptions size="small" column={{ xs: 1, md: 3 }} className="compact-descriptions">
           <Descriptions.Item label="文件名">{source.filename}</Descriptions.Item>
-          <Descriptions.Item label="页码">{source.page ?? "无"}</Descriptions.Item>
+          <Descriptions.Item label="页码">{pageLabel}</Descriptions.Item>
           <Descriptions.Item label="相关度">{source.score}</Descriptions.Item>
         </Descriptions>
 

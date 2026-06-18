@@ -9,7 +9,7 @@ import StatusTag from "../components/StatusTag";
 const { Dragger } = AntUpload;
 const { Paragraph, Text } = Typography;
 
-const allowedTypes = ["pdf", "docx", "txt", "md"];
+const allowedTypes = ["pdf", "docx", "txt"];
 
 function getFileExtension(filename = "") {
   const parts = filename.split(".");
@@ -41,7 +41,7 @@ export default function Upload() {
       return;
     }
     if (!isAllowed) {
-      message.error("当前阶段仅支持 PDF、DOCX、TXT、Markdown");
+      message.error("当前阶段仅支持 PDF、DOCX、TXT");
       return;
     }
 
@@ -60,7 +60,7 @@ export default function Upload() {
 
       setProgress(100);
       setDocumentResult(response.data);
-      message.success("模拟上传成功，已返回文档对象");
+      message.success("上传成功，已返回 Document 对象");
     } finally {
       setUploading(false);
     }
@@ -80,17 +80,16 @@ export default function Upload() {
         icon={APP_ICONS.upload}
         eyebrow="上传接口"
         title="上传中心"
-        description="面向 6 月 14 日集成验收的文档入口。当前阶段使用契约驱动的模拟数据，后续可直接切换 A 负责的真实上传接口。"
-        tags={["文档对象", "表单上传", "模拟上传"]}
+        description="上传课程资料到 FastAPI 后端。当前契约只允许 PDF、DOCX、TXT。"
+        tags={["PDF", "DOCX", "TXT", "真实 API"]}
       />
-
 
       <div className="upload-grid">
         <Card className="glass-card upload-card" variant="borderless">
           <Space direction="vertical" size={16} className="full-width">
             <Dragger
               maxCount={1}
-              accept=".pdf,.docx,.txt,.md,.markdown"
+              accept=".pdf,.docx,.txt"
               fileList={fileList}
               beforeUpload={(file) => {
                 setSelectedFile(file);
@@ -106,11 +105,11 @@ export default function Upload() {
                 <IconFont type={APP_ICONS.upload} />
               </div>
               <p className="ant-upload-text">点击或拖拽课程资料到此区域</p>
-              <p className="ant-upload-hint">支持 PDF、DOCX、TXT、Markdown。前端只通过上传接口契约交互。</p>
+              <p className="ant-upload-hint">支持 PDF、DOCX、TXT。前端只通过上传接口契约交互。</p>
             </Dragger>
 
             <div className="allowed-type-row">
-              <Text type="secondary">文件类型提示</Text>
+              <Text type="secondary">允许的文件类型</Text>
               <Space size={8} wrap>
                 {allowedTypes.map((type) => (
                   <FileTypeTag key={type} fileType={type} />
@@ -145,30 +144,20 @@ export default function Upload() {
         </Card>
 
         <Card className="glass-card pipeline-card" variant="borderless" title="处理链路预览">
-          <Space direction="vertical" size={12} className="full-width" style={{ marginBottom: 18 }}>
-            <div className="premium-quick-card">
-              <span className="premium-quick-card__icon"><IconFont type={APP_ICONS.shield} /></span>
-              <div><Text strong>契约优先</Text><br /><Text type="secondary">仅展示文档对象字段，后端切换不破坏页面。</Text></div>
-            </div>
-            <div className="premium-quick-card">
-              <span className="premium-quick-card__icon"><IconFont type={APP_ICONS.uploadLoading} /></span>
-              <div><Text strong>状态可视化</Text><br /><Text type="secondary">已上传、处理中、已处理、处理失败全链路可展示。</Text></div>
-            </div>
-          </Space>
           <Steps
             direction="vertical"
             current={documentResult ? 1 : selectedFile ? 0 : -1}
             items={[
-              { title: "已上传", description: "前端返回文档状态：已上传" },
-              { title: "处理中", description: "B 负责解析、清洗、切片" },
-              { title: "已处理", description: "C 建立向量索引，D 可进行问答" },
-              { title: "处理失败", description: "异常时使用失败状态兜底" },
+              { title: "已上传", description: "后端返回 Document，状态通常为 uploaded。" },
+              { title: "重建索引", description: "到知识库页面点击重建索引，触发解析、切片、Embedding 和 FAISS。" },
+              { title: "已处理", description: "状态变为 processed，chunk_count 大于 0 后可问答。" },
+              { title: "问答与来源", description: "Chat 页面展示 answer、model、created_at 和 sources。" },
             ]}
           />
         </Card>
       </div>
 
-      <Card title="上传状态区域 · 文档对象" className="glass-card" variant="borderless">
+      <Card title="上传结果：Document" className="glass-card" variant="borderless">
         {documentResult ? (
           <Descriptions bordered column={{ xs: 1, md: 2 }} size="middle" className="contract-descriptions">
             <Descriptions.Item label="文档编号">{documentResult.document_id}</Descriptions.Item>
@@ -182,12 +171,12 @@ export default function Upload() {
         ) : (
           <div className="empty-contract-panel">
             <IconFont type={APP_ICONS.file} />
-            <Paragraph type="secondary">尚未上传文件。上传后会展示后端上传接口应返回的文档对象。</Paragraph>
+            <Paragraph type="secondary">尚未上传文件。上传后这里会展示后端返回的 Document 对象。</Paragraph>
           </div>
         )}
         <Divider />
         <Paragraph type="secondary" className="no-margin">
-          本页只做前端界面与模拟请求验证，不负责后端接口实现、文档解析、向量索引或大模型。
+          上传后请进入知识库页面点击“重建索引”，完成后再到 Chat 页面提问。
         </Paragraph>
       </Card>
     </Space>

@@ -15,6 +15,11 @@ dist/
 .env.local
 
 # Runtime data
+data/edurag.db
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+/models/
 uploads/raw/*
 uploads/processed/*
 uploads/temp/*
@@ -31,4 +36,3 @@ data/raw/*
 # Reports and demo artifacts can be large; add intentionally when needed.
 docs/demo/*.mp4
 release/
-
