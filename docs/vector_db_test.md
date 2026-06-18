@@ -18,6 +18,56 @@ vector_store/faiss_index/
 
 C does not own document parsing, LLM answers, backend routes, or frontend pages.
 
+## Branch Alignment
+
+Per `README.md` and the repository branch rules, C's standard feature branch is:
+
+```text
+feature/vector-db
+```
+
+If work was accidentally pushed to:
+
+```text
+feature/vector-db-implementation
+```
+
+then the missed collaboration steps are:
+
+```text
+1. Open or update a pull request from feature/vector-db-implementation into dev.
+2. In the PR description, explicitly state that this is Owner C work for the standard feature/vector-db scope.
+3. Include the required PR fields from docs/contribution_rules.md.
+4. Attach this document as C's evidence document.
+5. After review, either retarget/rename the branch to feature/vector-db or let A merge the PR into dev and delete the non-standard branch.
+```
+
+Recommended PR statement:
+
+```text
+Owner: C
+Completed work: Embedding wrapper, FAISS build/save/load, Top-K retriever, vector DB evidence.
+Changed files: rag/embedding.py, rag/vector_store.py, rag/retriever.py, scripts/test_vector_store.py, docs/vector_db_test.md, vector_store/faiss_index/
+Contract changed: no
+Docs updated: yes, docs/vector_db_test.md
+Test evidence: python scripts/test_vector_store.py; retrieval tables and FAISS save/load evidence in docs/vector_db_test.md
+Handoff target: D and A
+Current blockers: real BGE model mode depends on local dependency alignment; final semantic evidence should rerun with B's real Chunk[]
+```
+
+Issue completion reply for C:
+
+```text
+完成内容：完成 embedding mock/real mode wrapper、FAISS 保存/加载、Top-K retrieval、RetrievedChunk[] 输出验证。
+交付文件：rag/embedding.py, rag/vector_store.py, rag/retriever.py, scripts/test_vector_store.py, docs/vector_db_test.md, vector_store/faiss_index/
+输出数据示例：RetrievedChunk Example 见本文件。
+测试证据：python scripts/test_vector_store.py；Top-K Retrieval Tests 见本文件。
+需要通知谁：D、A。
+当前问题：Stage 1 默认使用 deterministic mock embedding；真实 bge-small-zh-v1.5 需等待本地依赖对齐，并在 B 的真实 Chunk[] 完成后重跑。
+Mock data used: yes, sample Chunk[] in scripts/test_vector_store.py.
+What real upstream output is still needed: B 的真实 Chunk[] 和 uploads/processed/{document_id}.json。
+```
+
 ## Contract Status
 
 This implementation does not change interface contracts.
