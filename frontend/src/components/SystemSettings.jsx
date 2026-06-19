@@ -215,6 +215,17 @@ export default function SystemSettings({ open, onClose }) {
               />
             </div>
 
+            <div className="settings-control-card settings-control-card--inline">
+              <div>
+                <Text strong>显示页面说明与接口标签</Text>
+                <Paragraph>开启后显示顶部面包屑、标题上方接口名称、页面介绍和 PDF / DOCX / TXT 等标签；关闭后页面更精简。</Paragraph>
+              </div>
+              <Switch
+                checked={settings.showPageHeaderDetails}
+                onChange={(checked) => updateSetting("showPageHeaderDetails", checked)}
+              />
+            </div>
+
             <div className="settings-control-card">
               <div>
                 <Text strong>圆角风格</Text>

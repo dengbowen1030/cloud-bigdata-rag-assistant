@@ -76,6 +76,7 @@ export const defaultSystemSettings = {
   reduceMotion: false,
   compactMode: false,
   showShortcutHint: true,
+  showPageHeaderDetails: false,
   roundedLevel: "large",
 };
 
@@ -103,6 +104,7 @@ export function applySystemSettings(settings) {
   root.dataset.reduceMotion = settings.reduceMotion ? "true" : "false";
   root.dataset.compact = settings.compactMode ? "true" : "false";
   root.dataset.shortcutHint = settings.showShortcutHint ? "true" : "false";
+  root.dataset.pageHints = settings.showPageHeaderDetails ? "true" : "false";
   root.dataset.rounded = settings.roundedLevel || defaultSystemSettings.roundedLevel;
   root.style.setProperty("--settings-blur", `${settings.glassBlur ?? defaultSystemSettings.glassBlur}px`);
 }

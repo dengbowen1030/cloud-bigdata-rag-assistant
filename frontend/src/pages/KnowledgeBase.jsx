@@ -1,6 +1,6 @@
-import { App, Button, Card, Col, Input, Row, Select, Space, Table, Tooltip, Typography } from "antd";
-import { useEffect, useMemo, useState } from "react";
-import { getDocuments, rebuildDocument } from "../api/documents";
+import { App, Button, Card, Col, Collapse, Input, Popconfirm, Row, Select, Space, Table, Tooltip, Typography } from "antd";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { deleteDocument, getDocuments, rebuildDocument } from "../api/documents";
 import FileTypeTag from "../components/FileTypeTag";
 import IconFont, { APP_ICONS } from "../components/IconFont";
 import PageHeader from "../components/PageHeader";
@@ -14,9 +14,11 @@ export default function KnowledgeBase() {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [rebuildingId, setRebuildingId] = useState("");
+  const [deletingId, setDeletingId] = useState("");
   const [errorText, setErrorText] = useState("");
   const [keyword, setKeyword] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const autoRebuildIdsRef = useRef(new Set());
 
   const loadDocuments = async () => {
     setLoading(true);
@@ -32,7 +34,7 @@ export default function KnowledgeBase() {
     setDocuments(response.data || []);
   };
 
-  const handleRebuild = async (documentId) => {
+  const handleRebuild = async (documentId, options = {}) => {
     setRebuildingId(documentId);
     const response = await rebuildDocument(documentId);
     setRebuildingId("");
@@ -42,13 +44,41 @@ export default function KnowledgeBase() {
       return;
     }
 
-    message.success("索引重建完成");
+    message.success(options.auto ? "检测到已上传文档，已自动重建索引" : "索引重建完成");
+    await loadDocuments();
+  };
+
+  const handleDelete = async (documentId) => {
+    setDeletingId(documentId);
+    const response = await deleteDocument(documentId);
+    setDeletingId("");
+
+    if (!response.success) {
+      message.error(response.error_code ? `${response.message || "删除文档失败"} (${response.error_code})` : response.message || "删除文档失败");
+      return;
+    }
+
+    message.success("文档已删除");
     await loadDocuments();
   };
 
   useEffect(() => {
     loadDocuments();
   }, []);
+
+  useEffect(() => {
+    const target = documents.find(
+      (item) =>
+        item.status === "uploaded" &&
+        Number(item.chunk_count || 0) === 0 &&
+        !autoRebuildIdsRef.current.has(item.document_id),
+    );
+
+    if (!target) return;
+
+    autoRebuildIdsRef.current.add(target.document_id);
+    handleRebuild(target.document_id, { auto: true });
+  }, [documents]);
 
   const filteredDocuments = useMemo(() => {
     const lowerKeyword = keyword.trim().toLowerCase();
@@ -105,17 +135,37 @@ export default function KnowledgeBase() {
     {
       title: "操作",
       key: "actions",
-      width: 140,
+      width: 230,
+      fixed: "right",
       render: (_, record) => (
-        <Button
-          size="small"
-          type="primary"
-          loading={rebuildingId === record.document_id}
-          disabled={record.status === "processing"}
-          onClick={() => handleRebuild(record.document_id)}
-        >
-          重建索引
-        </Button>
+        <Space size={8}>
+          <Button
+            size="small"
+            type="primary"
+            loading={rebuildingId === record.document_id}
+            disabled={record.status === "processing" || deletingId === record.document_id}
+            onClick={() => handleRebuild(record.document_id)}
+          >
+            重建索引
+          </Button>
+          <Popconfirm
+            title="确认删除该文档？"
+            description="删除后将移除该文档记录，相关文件和索引由后端统一处理。"
+            okText="确认删除"
+            cancelText="取消"
+            okButtonProps={{ danger: true, loading: deletingId === record.document_id }}
+            onConfirm={() => handleDelete(record.document_id)}
+          >
+            <Button
+              size="small"
+              danger
+              loading={deletingId === record.document_id}
+              disabled={rebuildingId === record.document_id || record.status === "processing"}
+            >
+              删除文件
+            </Button>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
@@ -134,20 +184,38 @@ export default function KnowledgeBase() {
         </Button>
       </PageHeader>
 
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} lg={6}>
-          <StatsCard label="文档总量" value={documents.length} icon={APP_ICONS.file} hint="documents 表记录数" percent={Math.min(100, documents.length * 10)} />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatsCard label="已处理" value={processedCount} icon={APP_ICONS.check} hint="status=processed" percent={documents.length ? Math.round((processedCount / documents.length) * 100) : 0} />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatsCard label="切片总量" value={chunkTotal} icon={APP_ICONS.knowledge} hint="chunk_count 汇总" percent={Math.min(100, Math.round(chunkTotal / 4))} />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatsCard label="需关注" value={failedCount + processingCount} icon={APP_ICONS.shield} hint="processing + failed" percent={documents.length ? Math.round(((failedCount + processingCount) / documents.length) * 100) : 0} />
-        </Col>
-      </Row>
+      <Collapse
+        className="kb-metrics-collapse"
+        bordered={false}
+        defaultActiveKey={[]}
+        items={[
+          {
+            key: "metrics",
+            label: (
+              <div className="kb-metrics-collapse__label">
+                <span>知识库统计概览</span>
+                <Text type="secondary">文档总量、已处理、切片总量与需关注状态</Text>
+              </div>
+            ),
+            children: (
+              <Row gutter={[16, 16]}>
+                <Col xs={24} sm={12} lg={6}>
+                  <StatsCard label="文档总量" value={documents.length} icon={APP_ICONS.file} hint="documents 表记录数" percent={Math.min(100, documents.length * 10)} />
+                </Col>
+                <Col xs={24} sm={12} lg={6}>
+                  <StatsCard label="已处理" value={processedCount} icon={APP_ICONS.check} hint="status=processed" percent={documents.length ? Math.round((processedCount / documents.length) * 100) : 0} />
+                </Col>
+                <Col xs={24} sm={12} lg={6}>
+                  <StatsCard label="切片总量" value={chunkTotal} icon={APP_ICONS.knowledge} hint="chunk_count 汇总" percent={Math.min(100, Math.round(chunkTotal / 4))} />
+                </Col>
+                <Col xs={24} sm={12} lg={6}>
+                  <StatsCard label="需关注" value={failedCount + processingCount} icon={APP_ICONS.shield} hint="processing + failed" percent={documents.length ? Math.round(((failedCount + processingCount) / documents.length) * 100) : 0} />
+                </Col>
+              </Row>
+            ),
+          },
+        ]}
+      />
 
       <Card className="glass-card" variant="borderless">
         {errorText ? <Paragraph type="danger">{errorText}</Paragraph> : null}
