@@ -134,7 +134,50 @@ Returns backend health.
 
 ### `DELETE /documents/{document_id}`
 
-- Output: `{ "document_id": "doc_001", "deleted": true }`
+- Success output:
+
+```json
+{
+  "success": true,
+  "data": {
+    "document_id": "doc_001",
+    "deleted": true
+  },
+  "message": "Document deleted successfully.",
+  "error_code": null
+}
+```
+
+- Failure output when `document_id` does not exist:
+
+```json
+{
+  "success": false,
+  "data": null,
+  "message": "Document not found.",
+  "error_code": "DOCUMENT_NOT_FOUND"
+}
+```
+
+- Defensive failure output when cleanup or FAISS rebuild fails:
+
+```json
+{
+  "success": false,
+  "data": null,
+  "message": "Document delete failed: ErrorType",
+  "error_code": "DOCUMENT_DELETE_FAILED"
+}
+```
+
+- Delete behavior:
+  - Deletes the `documents` row.
+  - Deletes related `chunks` rows.
+  - Deletes `uploads/raw/{document_id}/` when it exists.
+  - Deletes `uploads/processed/{document_id}.json` when it exists.
+  - Rebuilds the FAISS index from remaining database chunks.
+  - If no chunks remain, removes `index.faiss` and `metadata.json`; `/chat/query` should then return `VECTOR_INDEX_NOT_READY`.
+  - Deleted documents must not appear in future `ChatAnswer.sources`.
 
 ### `POST /documents/{document_id}/rebuild`
 

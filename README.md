@@ -294,3 +294,20 @@ frontend/dist/
 - 前端改写约束：`docs/frontend_guidelines.md`
 
 任何人修改 API 路径、请求字段、响应字段或 error_code，都必须同步更新 `docs/module_contracts.md` 和 `docs/api_design.md`。
+
+## 删除文档行为
+
+知识库页面的删除操作调用 `DELETE /documents/{document_id}`。删除成功后，后端会删除 `documents` 记录、对应 `chunks`、原始上传目录和 processed JSON，并用数据库中剩余 chunks 重新生成 FAISS 索引。
+
+如果删除后没有任何 chunk，后端会清空 `vector_store/faiss_index/index.faiss` 和 `metadata.json`。此时继续提问应返回 `VECTOR_INDEX_NOT_READY` 或等价的无索引提示，而不是继续引用已删除文档。
+
+删除不存在的文档不会返回裸 500，而是统一 envelope：
+
+```json
+{
+  "success": false,
+  "data": null,
+  "message": "Document not found.",
+  "error_code": "DOCUMENT_NOT_FOUND"
+}
+```

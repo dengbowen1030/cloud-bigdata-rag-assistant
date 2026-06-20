@@ -80,6 +80,12 @@ def _processed_json_path(document_id: str) -> Path:
     return Path(settings.processed_dir) / f"{document_id}.json"
 
 
+def _clear_vector_store_files() -> None:
+    vector_dir = Path(settings.vector_store_dir)
+    for filename in ("index.faiss", "metadata.json"):
+        (vector_dir / filename).unlink(missing_ok=True)
+
+
 def _find_raw_file(document: DocumentModel) -> Path:
     path = _raw_document_path(document.document_id, document.filename)
     if not path.exists():
@@ -95,6 +101,25 @@ def _load_all_chunk_dicts_except(document_id: str) -> list[dict[str, Any]]:
             .order_by(ChunkModel.document_id, ChunkModel.chunk_index)
         ).all()
         return [_chunk_to_dict(chunk) for chunk in chunks]
+
+
+def rebuild_vector_store_from_database() -> int:
+    with SessionLocal() as db:
+        chunks = db.scalars(select(ChunkModel).order_by(ChunkModel.document_id, ChunkModel.chunk_index)).all()
+        chunk_dicts = [_chunk_to_dict(chunk) for chunk in chunks]
+
+    _clear_vector_store_files()
+    if not chunk_dicts:
+        return 0
+
+    provider = EmbeddingProvider(
+        model_name=settings.rag_embedding_model_path,
+        mode=settings.rag_embedding_mode,
+    )
+    store = FaissVectorStore(embedding_provider=provider)
+    store.build_index(chunk_dicts)
+    store.save(settings.vector_store_dir)
+    return len(chunk_dicts)
 
 
 def _save_processed_json(document: DocumentModel, chunks: list[dict[str, Any]]) -> None:
@@ -146,6 +171,7 @@ def delete_document(document_id: str) -> bool:
 
     shutil.rmtree(_raw_document_dir(document_id), ignore_errors=True)
     _processed_json_path(document_id).unlink(missing_ok=True)
+    rebuild_vector_store_from_database()
     return True
 
 

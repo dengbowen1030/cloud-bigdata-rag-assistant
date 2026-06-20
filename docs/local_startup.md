@@ -177,3 +177,15 @@ python -m unittest discover -s backend\tests -p "test_*.py"
 cd D:\Agent_project\CodeX\temporary_job\cloud_data\big_project\cloud-bigdata-rag-assistant\frontend
 npm.cmd run build
 ```
+
+## 删除文档验收
+
+知识库页面删除文档时会调用：
+
+```text
+DELETE /documents/{document_id}
+```
+
+删除成功后，刷新知识库页面，该文档不应再出现。后端同时清理对应 chunks、原始上传文件、processed JSON，并用剩余 chunks 重建 FAISS。如果删除后没有任何可用 chunk，后端会清空 FAISS 文件，之后提问应提示 `VECTOR_INDEX_NOT_READY`。
+
+删除不存在的文档时，后端应返回统一失败 envelope，错误码为 `DOCUMENT_NOT_FOUND`，前端应显示后端 message，而不是只显示 Network Error。

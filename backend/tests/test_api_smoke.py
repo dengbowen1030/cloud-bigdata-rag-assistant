@@ -317,6 +317,112 @@ class ApiSmokeTest(unittest.TestCase):
         self.assertEqual(after_stats["question_count"], 1)
         self.assertIsNotNone(after_stats["latest_question_time"])
 
+    def test_delete_existing_document_cleans_database_files_stats_and_index(self):
+        with TestClient(app) as client:
+            upload = client.post(
+                "/upload",
+                files={
+                    "file": (
+                        "delete-target.txt",
+                        b"Cloud deletion target has temporary content for vector cleanup.",
+                        "text/plain",
+                    )
+                },
+            )
+            document_id = upload.json()["data"]["document_id"]
+            rebuild = client.post(f"/documents/{document_id}/rebuild")
+            self.assertTrue(rebuild.json()["success"])
+            before_stats = client.get("/stats").json()["data"]
+
+            delete = client.delete(f"/documents/{document_id}")
+            documents = client.get("/documents")
+            after_stats = client.get("/stats").json()["data"]
+            chat = client.post("/chat/query", json={"question": "What is the deletion target?", "top_k": 5})
+
+        payload = delete.json()
+        assert_envelope(self, payload)
+        self.assertTrue(payload["success"])
+        self.assertEqual(payload["message"], "Document deleted successfully.")
+        self.assertEqual(payload["data"], {"document_id": document_id, "deleted": True})
+
+        document_ids = [item["document_id"] for item in documents.json()["data"]]
+        self.assertNotIn(document_id, document_ids)
+
+        with SessionLocal() as db:
+            chunks = db.scalars(select(ChunkModel).where(ChunkModel.document_id == document_id)).all()
+        self.assertEqual(chunks, [])
+        self.assertFalse((Path(settings.upload_dir) / document_id).exists())
+        self.assertFalse((Path(settings.processed_dir) / f"{document_id}.json").exists())
+
+        self.assertEqual(before_stats["document_count"], 1)
+        self.assertGreater(before_stats["chunk_count"], 0)
+        self.assertEqual(after_stats["document_count"], 0)
+        self.assertEqual(after_stats["chunk_count"], 0)
+        self.assertFalse((Path(settings.vector_store_dir) / "index.faiss").exists())
+        self.assertFalse((Path(settings.vector_store_dir) / "metadata.json").exists())
+        self.assertEqual(chat.json()["error_code"], "VECTOR_INDEX_NOT_READY")
+
+    def test_delete_missing_document_returns_failure_envelope(self):
+        with TestClient(app) as client:
+            response = client.delete("/documents/doc_missing")
+
+        payload = response.json()
+        assert_envelope(self, payload)
+        self.assertFalse(payload["success"])
+        self.assertIsNone(payload["data"])
+        self.assertEqual(payload["message"], "Document not found.")
+        self.assertEqual(payload["error_code"], "DOCUMENT_NOT_FOUND")
+
+    def test_delete_rebuilds_index_from_remaining_chunks_and_chat_excludes_deleted_source(self):
+        with TestClient(app) as client:
+            deleted_upload = client.post(
+                "/upload",
+                files={
+                    "file": (
+                        "deleted-source.txt",
+                        b"Deleted source content should disappear from the vector index.",
+                        "text/plain",
+                    )
+                },
+            )
+            deleted_id = deleted_upload.json()["data"]["document_id"]
+            kept_upload = client.post(
+                "/upload",
+                files={
+                    "file": (
+                        "kept-source.txt",
+                        b"Kept source content remains available after deleting another document.",
+                        "text/plain",
+                    )
+                },
+            )
+            kept_id = kept_upload.json()["data"]["document_id"]
+            self.assertTrue(client.post(f"/documents/{deleted_id}/rebuild").json()["success"])
+            self.assertTrue(client.post(f"/documents/{kept_id}/rebuild").json()["success"])
+
+            delete = client.delete(f"/documents/{deleted_id}")
+            chat = client.post("/chat/query", json={"question": "Which source content remains available?", "top_k": 5})
+
+        self.assertTrue(delete.json()["success"])
+        self.assertTrue((Path(settings.vector_store_dir) / "index.faiss").exists())
+        self.assertTrue((Path(settings.vector_store_dir) / "metadata.json").exists())
+
+        retriever = Retriever(
+            index_dir=settings.vector_store_dir,
+            embedding_provider=EmbeddingProvider(mode="mock"),
+        )
+        retrieved_chunks = retriever.retrieve("source content", top_k=5)
+        self.assertGreater(len(retrieved_chunks), 0)
+        self.assertNotIn(deleted_id, [item["document_id"] for item in retrieved_chunks])
+        self.assertIn(kept_id, [item["document_id"] for item in retrieved_chunks])
+
+        chat_payload = chat.json()
+        assert_envelope(self, chat_payload)
+        self.assertTrue(chat_payload["success"])
+        filenames = [source["filename"] for source in chat_payload["data"]["sources"]]
+        self.assertNotIn("deleted-source.txt", filenames)
+        self.assertIn("kept-source.txt", filenames)
+
     def test_stats_document_count_changes_after_upload(self):
         with TestClient(app) as client:
             before = client.get("/stats").json()["data"]
