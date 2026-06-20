@@ -119,6 +119,7 @@ Failure response:
 | `UPLOAD_FILE_TYPE_UNSUPPORTED` | Uploaded file type is not PDF, DOCX, or TXT |
 | `UPLOAD_FILE_EMPTY` | Uploaded file is empty |
 | `DOCUMENT_NOT_FOUND` | `document_id` does not exist |
+| `DOCUMENT_DELETE_FAILED` | Document database/file/vector cleanup failed |
 | `DOCUMENT_PROCESSING_FAILED` | Parsing, cleaning, or splitting failed |
 | `VECTOR_INDEX_NOT_READY` | FAISS index has not been built or loaded |
 | `RETRIEVAL_NO_SOURCE` | Retrieval did not return reliable source chunks |
@@ -331,6 +332,41 @@ Output:
   "deleted": true
 }
 ```
+
+Envelope success response:
+
+```json
+{
+  "success": true,
+  "data": {
+    "document_id": "doc_001",
+    "deleted": true
+  },
+  "message": "Document deleted successfully.",
+  "error_code": null
+}
+```
+
+Envelope failure response:
+
+```json
+{
+  "success": false,
+  "data": null,
+  "message": "Document not found.",
+  "error_code": "DOCUMENT_NOT_FOUND"
+}
+```
+
+If database/file/vector cleanup fails after a document exists, the endpoint must still return a unified failure envelope with `error_code="DOCUMENT_DELETE_FAILED"` instead of a bare 500.
+
+Contract rules:
+
+- Deleting a document must delete its `Document` record and all related `Chunk[]` records.
+- Deleting a document must remove or invalidate local runtime artifacts for that document, including raw upload files and processed JSON.
+- FAISS must be rebuilt from remaining database chunks, or cleared when no chunks remain.
+- A deleted document must never be returned as a later `RetrievedChunk[]` item or `ChatAnswer.sources` entry.
+- `GET /stats` must reflect the deletion through `document_count` and `chunk_count`.
 
 ### `POST /documents/{document_id}/rebuild`
 

@@ -40,10 +40,16 @@ def get_documents():
 
 @router.delete("/documents/{document_id}", response_model=ApiResponse)
 def remove_document(document_id: str):
-    deleted = delete_document(document_id)
+    try:
+        deleted = delete_document(document_id)
+    except Exception as exc:
+        return failure_response(f"Document delete failed: {exc.__class__.__name__}", "DOCUMENT_DELETE_FAILED")
     if not deleted:
         return failure_response("Document not found.", "DOCUMENT_NOT_FOUND")
-    return success_response({"document_id": document_id, "deleted": True})
+    return success_response(
+        {"document_id": document_id, "deleted": True},
+        "Document deleted successfully.",
+    )
 
 
 @router.post("/documents/{document_id}/rebuild", response_model=ApiResponse)
