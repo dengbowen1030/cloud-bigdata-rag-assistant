@@ -2236,3 +2236,417 @@ html[data-rounded="vision"] {
   }
 }
 
+/* ==========================================================================
+   Course demo simplification controls
+   默认隐藏页面说明、接口标签和协议标签；可在系统设置中开启。
+   ========================================================================== */
+
+html:not([data-page-hints="true"]) .page-hero__eyebrow,
+html:not([data-page-hints="true"]) .page-hero__desc,
+html:not([data-page-hints="true"]) .page-hero__tags {
+  display: none !important;
+}
+
+html:not([data-page-hints="true"]) .page-hero__title {
+  margin-bottom: 0 !important;
+}
+
+.sider-footer-card--clean {
+  padding: 14px !important;
+}
+
+.sider-footer-title {
+  margin-bottom: 10px;
+  color: var(--theme-muted, #64748b);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sider-status-list {
+  display: grid;
+  gap: 8px;
+}
+
+.sider-status-pill--split {
+  width: 100%;
+  display: grid !important;
+  grid-template-columns: 18px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px !important;
+  line-height: 1.2;
+}
+
+.sider-status-pill--split strong {
+  color: var(--theme-text-strong, #0f172a);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* ==========================================================================
+   Page hint hidden mode refinement
+   关闭“显示页面说明与接口标签”时：页面头图标与标题保持居中，顶部面包屑隐藏，搜索框加长。
+   ========================================================================== */
+
+.header-center-search {
+  width: min(585px, 48vw) !important;
+  flex: 0 1 min(585px, 48vw);
+}
+
+html:not([data-page-hints="true"]) .app-breadcrumb {
+  display: none !important;
+}
+
+html:not([data-page-hints="true"]) .app-header > div:first-child {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+html:not([data-page-hints="true"]) .app-header h3 {
+  margin: 0 !important;
+}
+
+html:not([data-page-hints="true"]) .page-hero {
+  min-height: 132px !important;
+}
+
+html:not([data-page-hints="true"]) .page-hero .ant-card-body {
+  min-height: 132px;
+  display: flex;
+  align-items: center;
+}
+
+html:not([data-page-hints="true"]) .page-hero__inner {
+  width: 100%;
+  min-height: 84px;
+  align-items: center !important;
+}
+
+html:not([data-page-hints="true"]) .page-hero__main {
+  align-items: center !important;
+}
+
+html:not([data-page-hints="true"]) .page-hero__title {
+  margin: 0 !important;
+  line-height: 1.08 !important;
+}
+
+html:not([data-page-hints="true"]) .page-hero__icon {
+  flex: 0 0 76px;
+  width: 76px;
+  height: 76px;
+}
+
+@media (max-width: 992px) {
+  .header-center-search {
+    width: 100% !important;
+    flex-basis: 100%;
+  }
+}
+
+
+/* ========================================================================== 
+   Header simplification + Notification Center
+   顶部搜索栏左侧标题区域已移除，通知中心采用专业网站常见的弹出式活动面板。
+   ========================================================================== */
+
+.app-header--search-only {
+  justify-content: space-between;
+}
+
+.app-header--search-only .header-center-search {
+  width: min(720px, 56vw) !important;
+  flex: 1 1 min(720px, 56vw);
+  max-width: 720px;
+}
+
+.app-header--search-only .header-actions {
+  flex: 0 0 auto;
+}
+
+.notification-trigger.ant-btn {
+  position: relative;
+}
+
+.notification-popover .ant-popover-inner {
+  padding: 0 !important;
+  border-radius: 24px !important;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  box-shadow: 0 24px 72px rgba(15, 23, 42, 0.14), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+.notification-panel {
+  width: 420px;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 20px;
+  color: var(--theme-text, #1d1d1f);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(124, 58, 237, 0.08), transparent 32%),
+    radial-gradient(circle at 100% 10%, rgba(236, 72, 153, 0.07), transparent 28%),
+    rgba(255,255,255,0.72);
+}
+
+.notification-panel__header,
+.notification-panel__footer,
+.notification-item__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.notification-panel__eyebrow {
+  display: inline-block;
+  margin-bottom: 5px;
+  color: var(--theme-accent, #7c3aed) !important;
+  font-size: 11px;
+  font-weight: 820;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.notification-panel h4 {
+  margin: 0 !important;
+  color: var(--theme-text-strong, #111827) !important;
+  letter-spacing: -0.035em;
+}
+
+.notification-panel__summary {
+  margin: 10px 0 0 !important;
+  color: var(--theme-muted, #6b7280) !important;
+  line-height: 1.7;
+}
+
+.notification-panel__count.ant-tag {
+  margin: 0;
+  border-radius: 999px;
+  color: var(--theme-accent, #7c3aed);
+  border-color: color-mix(in srgb, var(--theme-accent, #7c3aed) 18%, transparent);
+  background: color-mix(in srgb, var(--theme-accent, #7c3aed) 10%, white);
+  font-weight: 700;
+}
+
+.notification-list {
+  display: grid;
+  gap: 10px;
+}
+
+.notification-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  gap: 12px;
+  padding: 13px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 10px 24px rgba(15, 23, 42, 0.045);
+}
+
+.notification-item__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--theme-accent, #7c3aed);
+  background: color-mix(in srgb, var(--theme-accent, #7c3aed) 10%, white);
+  font-size: 18px;
+}
+
+.notification-item--success .notification-item__icon {
+  color: #0f766e;
+  background: rgba(15, 118, 110, 0.10);
+}
+
+.notification-item--warning .notification-item__icon {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.13);
+}
+
+.notification-item__content {
+  min-width: 0;
+}
+
+.notification-item__meta {
+  justify-content: flex-start;
+  margin-bottom: 5px;
+}
+
+.notification-item__meta .ant-tag {
+  margin: 0;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 18px;
+  color: var(--theme-muted, #64748b);
+  background: rgba(248,250,252,0.72);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+.notification-item__title {
+  display: block;
+  color: var(--theme-text-strong, #111827) !important;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.notification-item p {
+  margin: 0 !important;
+  color: var(--theme-muted, #64748b) !important;
+  font-size: 12px;
+  line-height: 1.58;
+}
+
+.notification-item__status {
+  align-self: start;
+  min-width: 38px;
+  padding-top: 2px;
+  color: var(--theme-muted, #94a3b8);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.notification-panel__footer {
+  align-items: center;
+}
+
+.notification-panel__footer .ant-typography {
+  max-width: 260px;
+  font-size: 12px;
+}
+
+html[data-theme="space"] .notification-popover .ant-popover-inner,
+html[data-appearance="dark"] .notification-popover .ant-popover-inner {
+  background: rgba(28, 28, 30, 0.88) !important;
+  border-color: rgba(255,255,255,0.10);
+}
+
+html[data-theme="space"] .notification-panel,
+html[data-appearance="dark"] .notification-panel {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(138, 216, 255, 0.08), transparent 32%),
+    rgba(28, 28, 30, 0.74);
+}
+
+html[data-theme="space"] .notification-item,
+html[data-appearance="dark"] .notification-item {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.08);
+}
+
+@media (max-width: 920px) {
+  .app-header--search-only .header-center-search {
+    width: 100% !important;
+    max-width: none;
+    order: 3;
+  }
+}
+
+
+/* ========================================================================== 
+   Header center alignment + compact visibility + knowledge base collapsible metrics
+   ========================================================================== */
+
+.app-header--search-only {
+  position: sticky;
+  justify-content: center !important;
+}
+
+.app-header--search-only .header-center-search {
+  width: min(780px, 58vw) !important;
+  max-width: 780px !important;
+  flex: 0 1 min(780px, 58vw) !important;
+  margin: 0 auto !important;
+}
+
+.app-header--search-only .header-actions {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+html:not([data-page-hints="true"]) .collapsible-api-mode,
+html:not([data-page-hints="true"]) .collapsible-status-panel {
+  display: none !important;
+}
+
+html:not([data-page-hints="true"]) .app-sider .app-menu {
+  margin-bottom: 18px;
+}
+
+.kb-metrics-collapse {
+  border-radius: 22px !important;
+  background: var(--theme-glass, rgba(255, 255, 255, 0.65)) !important;
+  border: 1px solid var(--theme-border, rgba(255, 255, 255, 0.8)) !important;
+  box-shadow: var(--theme-card-shadow, 0 18px 54px rgba(15, 23, 42, 0.06)) !important;
+  overflow: hidden;
+}
+
+.kb-metrics-collapse .ant-collapse-item {
+  border-bottom: 0 !important;
+}
+
+.kb-metrics-collapse .ant-collapse-header {
+  align-items: center !important;
+  padding: 15px 18px !important;
+  color: var(--theme-text-strong, #111827) !important;
+  font-weight: 760;
+}
+
+.kb-metrics-collapse .ant-collapse-content {
+  border-top: 1px solid rgba(148, 163, 184, 0.14) !important;
+  background: transparent !important;
+}
+
+.kb-metrics-collapse .ant-collapse-content-box {
+  padding: 16px !important;
+}
+
+.kb-metrics-collapse__label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.kb-metrics-collapse__label > span:first-child {
+  color: var(--theme-text-strong, #111827);
+  font-size: 15px;
+  font-weight: 780;
+}
+
+@media (max-width: 1180px) {
+  .app-header--search-only {
+    justify-content: flex-start !important;
+  }
+
+  .app-header--search-only .header-center-search {
+    margin: 0 !important;
+    width: min(560px, 46vw) !important;
+    flex-basis: min(560px, 46vw) !important;
+  }
+}
+
+@media (max-width: 920px) {
+  .app-header--search-only .header-actions {
+    position: static;
+    transform: none;
+  }
+
+  .app-header--search-only .header-center-search {
+    width: 100% !important;
+    max-width: none !important;
+    flex-basis: 100% !important;
+    order: 3;
+  }
+}

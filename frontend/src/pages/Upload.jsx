@@ -1,6 +1,6 @@
 import { App, Button, Card, Descriptions, Divider, Progress, Space, Steps, Tag, Typography, Upload as AntUpload } from "antd";
 import { useMemo, useRef, useState } from "react";
-import { uploadDocument } from "../api/documents";
+import { rebuildDocument, uploadDocument } from "../api/documents";
 import FileTypeTag from "../components/FileTypeTag";
 import IconFont, { APP_ICONS } from "../components/IconFont";
 import PageHeader from "../components/PageHeader";
@@ -28,6 +28,7 @@ export default function Upload() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [autoRebuilding, setAutoRebuilding] = useState(false);
   const [documentResult, setDocumentResult] = useState(null);
   const [progress, setProgress] = useState(0);
   const timerRef = useRef(null);
@@ -60,9 +61,26 @@ export default function Upload() {
 
       setProgress(100);
       setDocumentResult(response.data);
-      message.success("上传成功，已返回 Document 对象");
+      message.success("上传成功，正在自动重建索引");
+
+      setAutoRebuilding(true);
+      const rebuildResponse = await rebuildDocument(response.data.document_id);
+      setAutoRebuilding(false);
+
+      if (!rebuildResponse.success) {
+        message.warning(rebuildResponse.message || "自动重建索引失败，可到知识库页面手动重建");
+        return;
+      }
+
+      setDocumentResult((previous) => ({
+        ...previous,
+        status: rebuildResponse.data.status,
+        chunk_count: rebuildResponse.data.chunk_count,
+      }));
+      message.success("索引重建完成，文档已可用于智能问答");
     } finally {
       setUploading(false);
+      setAutoRebuilding(false);
     }
   };
 
@@ -71,6 +89,7 @@ export default function Upload() {
     setSelectedFile(null);
     setFileList([]);
     setDocumentResult(null);
+    setAutoRebuilding(false);
     setProgress(0);
   };
 
@@ -133,8 +152,8 @@ export default function Upload() {
             <Progress percent={progress} showInfo={progress > 0} status={progress === 100 ? "success" : "active"} />
 
             <Space wrap>
-              <Button type="primary" size="large" loading={uploading} disabled={!selectedFile || !isAllowed} onClick={handleUpload} icon={<IconFont type={APP_ICONS.upload} />}>
-                上传文件
+              <Button type="primary" size="large" loading={uploading || autoRebuilding} disabled={!selectedFile || !isAllowed} onClick={handleUpload} icon={<IconFont type={APP_ICONS.upload} />}>
+                {autoRebuilding ? "正在重建索引" : "上传文件"}
               </Button>
               <Button size="large" onClick={resetUpload} icon={<IconFont type={APP_ICONS.refresh} />}>
                 重置
@@ -146,10 +165,10 @@ export default function Upload() {
         <Card className="glass-card pipeline-card" variant="borderless" title="处理链路预览">
           <Steps
             direction="vertical"
-            current={documentResult ? 1 : selectedFile ? 0 : -1}
+            current={documentResult?.status === "processed" ? 2 : autoRebuilding ? 1 : documentResult ? 1 : selectedFile ? 0 : -1}
             items={[
               { title: "已上传", description: "后端返回 Document，状态通常为 uploaded。" },
-              { title: "重建索引", description: "到知识库页面点击重建索引，触发解析、切片、Embedding 和 FAISS。" },
+              { title: "自动重建索引", description: "上传成功后自动调用 rebuild 接口，触发解析、切片、Embedding 和 FAISS。" },
               { title: "已处理", description: "状态变为 processed，chunk_count 大于 0 后可问答。" },
               { title: "问答与来源", description: "Chat 页面展示 answer、model、created_at 和 sources。" },
             ]}
@@ -176,7 +195,7 @@ export default function Upload() {
         )}
         <Divider />
         <Paragraph type="secondary" className="no-margin">
-          上传后请进入知识库页面点击“重建索引”，完成后再到 Chat 页面提问。
+上传成功后系统会自动尝试重建索引；如果自动处理失败，可进入知识库页面手动点击“重建索引”，完成后再到 Chat 页面提问。
         </Paragraph>
       </Card>
     </Space>
