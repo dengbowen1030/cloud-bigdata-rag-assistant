@@ -24,7 +24,10 @@ uploads/raw/*
 uploads/processed/*
 uploads/temp/*
 vector_store/faiss_index/*
+vector_store/faiss_index_eval/*
 data/raw/*
+!data/raw/cloud_course_test_files/
+!data/raw/cloud_course_test_files/**
 
 # Keep directory placeholders
 !uploads/raw/.gitkeep

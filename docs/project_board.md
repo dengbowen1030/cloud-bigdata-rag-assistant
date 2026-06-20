@@ -23,6 +23,14 @@
 | `deploy/docker-nginx` | A | Docker, Nginx, cloud deployment |
 | `docs/report-ppt` | A + all | Report, PPT, screenshots, acceptance records |
 
+Branch note for C:
+
+```text
+feature/vector-db is the standard branch name.
+feature/vector-db-implementation is a non-standard working branch and should be treated as Owner C's vector-db scope only.
+If work exists on feature/vector-db-implementation, open/retarget its PR into dev, document Owner C evidence in docs/vector_db_test.md, and rename or delete the non-standard branch after merge.
+```
+
 ## Owner Reference Docs
 
 | Owner | Required docs |
