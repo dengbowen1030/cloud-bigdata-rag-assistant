@@ -1,0 +1,12 @@
+.git
+.env
+frontend/.env
+frontend/node_modules
+frontend/dist
+data/*.db
+uploads
+vector_store/faiss_index
+models
+__pycache__
+.pytest_cache
+*.pyc
