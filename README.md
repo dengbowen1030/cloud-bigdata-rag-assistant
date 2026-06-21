@@ -1,22 +1,18 @@
 # Cloud BigData RAG Assistant / EduRAG
 
-EduRAG 是一个面向“云计算与大数据”课程资料的本地 RAG 智能问答系统。用户上传课程资料后，系统会完成文档解析、文本切片、Embedding 向量化、FAISS 检索，并调用 DeepSeek 或 Qwen 生成带来源的答案。
+EduRAG 是一个面向“云计算与大数据”课程资料的 RAG 问答系统。系统支持上传课程资料，完成文档解析、文本切片、向量化检索，并基于检索到的来源片段生成答案。
 
-本仓库可以直接作为 GitHub 演示页面使用。演讲建议顺序是：
-
-```text
-小组成员分工 -> Docker Compose 部署 -> 系统总体架构 -> RAG 问答流程 -> 功能演示与评估证据
-```
+本项目当前重点是：多人协作完成一个可本地运行、可 Docker Compose 部署、可展示 RAG 检索证据的课程项目。
 
 ## 1. 小组成员分工
 
-图：项目按照后端、文档处理、向量检索、RAG 问答和前端联调拆分，成员之间通过固定的数据契约交接。
+下图展示项目成员和模块之间的交接关系。
 
 ![成员分工与模块协作图](<photo/图 4：成员分工与模块协作图.png>)
 
 | 成员 | 角色 | 主要工作 |
 |---|---|---|
-| A：邓博文 | 项目统筹、后端 API、GitHub 协作、最终演示 | 项目整体规划；GitHub Issue / Project 管理；FastAPI 后端接口骨架；API 契约与模块契约；集成验收；Docker Compose 部署验收；GitHub 演示与答辩。 |
+| A：邓博文 | 项目统筹、后端 API、GitHub 协作、最终展示 | 项目整体规划；GitHub Issue / Project 管理；FastAPI 后端接口骨架；API 契约与模块契约；集成验收；Docker Compose 部署验收。 |
 | B：李嘉杰 | 文档处理、文本解析、切片、Markdown 文档整理 | PDF / DOCX / TXT 文档解析；文本清洗；`Chunk[]` 切片；文档入库；部分 Markdown 文档整理与说明；协助报告材料整理。 |
 | C：张乔文 | Embedding、FAISS 向量库、检索模块 | 接入 `bge-small-zh-v1.5`；向量生成；FAISS 索引构建；Top-K 检索；输出 `RetrievedChunk[]`；检索测试与向量库说明。 |
 | D：张周伟 | LLM Adapter、RAG 问答链路 | DeepSeek / Qwen API 调用适配；RAG 问答链路；Prompt 组织；`ChatAnswer` 输出；无可靠来源时拒答；问答日志写入。 |
@@ -24,7 +20,7 @@ EduRAG 是一个面向“云计算与大数据”课程资料的本地 RAG 智�
 
 ## 2. Docker Compose 本机部署
 
-图：Docker Compose 使用 Nginx 作为统一入口，前端静态资源由 Nginx 托管，`/api` 请求反向代理到 FastAPI 后端。
+下图展示本机 Docker Compose 部署结构。浏览器统一访问 Nginx，前端静态文件由 Nginx 托管，`/api` 请求转发到 FastAPI 后端。
 
 ![Docker Compose 部署架构图](<photo/图 3：Docker Compose 部署架构图.png>)
 
@@ -57,7 +53,7 @@ RAG_EMBEDDING_MODEL_PATH=/app/models/bge-small-zh-v1.5
 注意：
 
 - 不要提交 `.env`。
-- 不要把 API Key 写进 GitHub、Issue、PR、README 或任何 docs。
+- 不要把 API Key 写进 GitHub、Issue、PR、README 或其他文档。
 
 ### 2.3 模型目录
 
@@ -103,7 +99,7 @@ docker compose down
 Swagger：http://127.0.0.1/api/docs
 ```
 
-Docker Compose 本机部署已通过验收：
+Docker Compose 本机部署已验证：
 
 - 前端页面能打开。
 - 后端 health 正常。
@@ -119,7 +115,7 @@ Docker Compose 本机部署已通过验收：
 
 ## 3. 系统总体架构
 
-图：系统从浏览器访问开始，经 Nginx 进入前端与后端，后端负责文档处理、向量检索、LLM 问答、日志和统计。
+下图展示系统的主要组成：前端、后端、文档处理、向量检索、大模型接口、数据库和本地文件存储。
 
 ![系统总体架构图](<photo/图 1：系统总体架构图.png>)
 
@@ -154,7 +150,7 @@ React 前端
 
 ## 4. RAG 问答流程
 
-图：RAG 分为知识库构建和用户问答两条链路。系统先把课程资料向量化写入 FAISS，再根据用户问题召回相关片段并生成答案。
+下图展示 RAG 的两条链路：资料入库链路和用户问答链路。
 
 ![RAG 检索问答流程图](<photo/图 2：RAG 检索问答流程图.png>)
 
@@ -178,7 +174,7 @@ RAG 流程说明：
   -> 前端展示 answer 和 sources
 ```
 
-`sources` 用于证明答案可追溯，核心字段包括：
+`sources` 用于说明答案来源，核心字段包括：
 
 ```text
 filename
@@ -188,7 +184,7 @@ score
 preview
 ```
 
-当没有可靠来源时，系统应拒答，避免大模型凭空编造。
+当没有可靠来源时，系统会拒答，避免生成没有依据的答案。
 
 ## 5. 核心功能
 
@@ -211,14 +207,14 @@ preview
 后端：
 
 ```powershell
-cd D:\Agent_project\CodeX\temporary_job\cloud_data\big_project\cloud-bigdata-rag-assistant\backend
+cd backend
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
 前端：
 
 ```powershell
-cd D:\Agent_project\CodeX\temporary_job\cloud_data\big_project\cloud-bigdata-rag-assistant\frontend
+cd frontend
 npm.cmd install
 npm.cmd run dev -- --host 127.0.0.1 --port 5173
 ```
@@ -238,22 +234,17 @@ VITE_USE_MOCK=false
 VITE_API_BASE_URL=http://127.0.0.1:8000
 ```
 
-## 7. 操作演示流程
+## 7. 页面展示顺序
 
-这部分可作为 GitHub 页面演示和答辩讲稿：
+建议按下面顺序介绍项目：
 
-1. 展示成员分工图，说明 A/B/C/D/E 的模块边界。
-2. 展示 Docker Compose 部署图，说明本机一键部署方式。
-3. 展示系统总体架构图，说明前端、后端、数据库、RAG 和文件存储的关系。
-4. 展示 RAG 问答流程图，说明 Chunk、Embedding、FAISS、Top-K、LLM 和 sources 的关系。
-5. 打开前端页面。
-6. 上传课程资料。
-7. 进入知识库页面并重建索引。
-8. 提问课程相关问题。
-9. 展示 answer 和 sources，说明答案来源可追溯。
-10. 展示日志和统计页面。
-11. 删除文档，并说明删除后会清理 chunks 和重建 FAISS，避免旧 source 残留。
-12. 展示 RAG 评估报告和验收记录。
+1. 小组成员分工：说明每个成员负责的模块。
+2. Docker Compose 部署：说明本机容器化部署方式。
+3. 系统总体架构：说明前端、后端、数据库、RAG 和文件存储的关系。
+4. RAG 问答流程：说明 Chunk、Embedding、FAISS、Top-K、LLM 和 sources 的关系。
+5. 功能流程：上传资料、重建索引、提问、查看来源、查看日志和统计。
+6. 删除文档：说明删除后会清理 chunks 和重建 FAISS，避免旧 source 残留。
+7. 评估材料：展示 RAG 评估报告和验收记录。
 
 ## 8. RAG 评估与证据
 
@@ -271,7 +262,7 @@ VITE_API_BASE_URL=http://127.0.0.1:8000
 
 - sources 可以追溯到上传资料。
 - 已记录成功案例和失败/限制案例。
-- 失败案例用于说明当前检索和解析能力边界，不作为虚假通过数据处理。
+- 失败案例用于说明当前检索和解析能力边界。
 
 ## 9. 已知限制
 
@@ -290,7 +281,7 @@ backend/       FastAPI 后端
 frontend/      React 前端
 rag/           RAG、Embedding、FAISS、LLM 调用
 docs/          文档、验收、报告
-photo/         GitHub 演示用架构说明图片
+photo/         架构说明图片
 nginx/         Nginx 反向代理配置
 data/          SQLite 数据目录
 uploads/       上传文件目录

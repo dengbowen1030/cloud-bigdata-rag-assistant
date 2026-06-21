@@ -112,14 +112,14 @@ DATABASE_URL=sqlite:////app/data/edurag.db
 前台启动：
 
 ```powershell
-cd D:\Agent_project\CodeX\temporary_job\cloud_data\big_project\cloud-bigdata-rag-assistant
+cd cloud-bigdata-rag-assistant
 docker compose up --build
 ```
 
 后台启动：
 
 ```powershell
-cd D:\Agent_project\CodeX\temporary_job\cloud_data\big_project\cloud-bigdata-rag-assistant
+cd cloud-bigdata-rag-assistant
 docker compose up -d --build
 ```
 
