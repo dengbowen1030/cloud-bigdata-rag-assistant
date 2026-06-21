@@ -1,5 +1,7 @@
 # 本机 Docker Compose 部署指南
 
+验收状态：Docker Compose 本机部署已通过。前端、后端 health、Swagger、上传、重建索引、问答、sources、删除文档和 Nginx `/api` 代理均已完成验收。
+
 ## 阶段说明
 
 本阶段是 Stage 3 部署第一步，只做本机 Docker Compose 部署：

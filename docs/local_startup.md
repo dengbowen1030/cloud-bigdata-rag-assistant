@@ -1,5 +1,7 @@
 # 本地启动说明
 
+如果用于课程演示或答辩，优先使用 `README.md` 和 `docs/deployment_guide.md` 中的 Docker Compose 部署方式；本文件主要保留给开发调试场景。
+
 本文档给组员使用：从 `dev` 分支拉下代码后，按这里启动后端和前端，完成本地真实 API 测试。
 
 ## 1. 拉取 dev 分支

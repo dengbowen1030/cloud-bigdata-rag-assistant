@@ -45,6 +45,12 @@ If work exists on feature/vector-db-implementation, open/retarget its PR into de
 
 Stage 1 task dependency order is documented in `docs/stage1_execution_order.md`.
 
+## Deployment Status
+
+- Docker Compose 本机部署已完成并通过验收。
+- 当前部署目标是本机演示，不包含云服务器部署。
+- 云服务器部署和 PostgreSQL 接入属于后续扩展，不作为当前阶段目标。
+
 All pull requests and handoffs must also follow:
 
 ```text
