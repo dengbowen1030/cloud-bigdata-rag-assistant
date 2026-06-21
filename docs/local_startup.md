@@ -1,11 +1,10 @@
-# 本地启动说明
+# 本地开发启动说明
 
-本文档给组员使用：从 `dev` 分支拉下代码后，按这里启动后端和前端，完成本地真实 API 测试。
+本文档用于开发调试。如果只需要运行部署版，优先查看 `README.md` 和 `docs/deployment_guide.md` 中的 Docker Compose 部署方式。
 
-## 1. 拉取 dev 分支
+## 1. 拉取代码
 
 ```powershell
-cd D:\Agent_project\CodeX\temporary_job\cloud_data\big_project\cloud-bigdata-rag-assistant
 git checkout dev
 git pull origin dev
 ```
@@ -23,14 +22,18 @@ frontend/node_modules/
 frontend/dist/
 ```
 
-## 2. 准备后端 .env
+## 2. 后端环境变量
 
-在项目根目录创建 `.env`。
+在项目根目录创建 `.env`，可以从 `.env.example` 复制：
 
-示例：
+```powershell
+copy .env.example .env
+```
+
+本地开发示例：
 
 ```text
-DATABASE_URL=sqlite:///D:/Agent_project/CodeX/temporary_job/cloud_data/big_project/cloud-bigdata-rag-assistant/data/edurag_stage2_real.db
+DATABASE_URL=sqlite:///./data/edurag.db
 UPLOAD_DIR=uploads/raw
 UPLOAD_PROCESSED_DIR=uploads/processed
 VECTOR_STORE_DIR=vector_store/faiss_index
@@ -38,22 +41,19 @@ RAG_EMBEDDING_MODE=real
 RAG_EMBEDDING_MODEL_PATH=models/bge-small-zh-v1.5
 RAG_EMBEDDING_DOWNLOAD=0
 LLM_PROVIDER=deepseek
-DEEPSEEK_API_KEY=填自己的 key，不要提交
-QWEN_API_KEY=填自己的 key，不要提交
+DEEPSEEK_API_KEY=填写自己的 key，不要提交
+QWEN_API_KEY=
 ```
 
 说明：
 
-- `DATABASE_URL` 可以改成本机自己的 SQLite 绝对路径。
+- `DATABASE_URL` 可以使用相对路径，也可以按需要改成本机自己的 SQLite 绝对路径。
 - `RAG_EMBEDDING_MODEL_PATH=models/bge-small-zh-v1.5` 会按项目根目录解析。
-- 如果模型路径写绝对路径，也可以正常加载。
 - 不要把真实 API Key 写进 GitHub、Issue、PR 或文档。
 
-## 3. 准备前端 frontend/.env
+## 3. 前端环境变量
 
-在 `frontend/` 目录创建 `frontend/.env`。
-
-示例：
+在 `frontend/` 目录创建 `frontend/.env`：
 
 ```text
 VITE_USE_MOCK=false
@@ -62,25 +62,25 @@ VITE_API_BASE_URL=http://127.0.0.1:8000
 
 说明：
 
-- `VITE_USE_MOCK=false` 表示前端走真实后端。
-- 如果后端端口改了，必须同步改 `VITE_API_BASE_URL`。
+- `VITE_USE_MOCK=false` 表示前端调用真实后端。
+- 如果后端端口变化，需要同步修改 `VITE_API_BASE_URL`。
 - `frontend/.env` 不要提交。
 
 ## 4. 启动后端
 
-普通 Python 环境：
+从项目根目录进入后端目录：
 
 ```powershell
-cd D:\Agent_project\CodeX\temporary_job\cloud_data\big_project\cloud-bigdata-rag-assistant\backend
+cd backend
 pip install -r requirements.txt
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-如果本机 `python` 不可用，可以使用 Codex bundled Python：
+如果本机 `python` 不可用，可以换成可用的 Python 解释器路径：
 
 ```powershell
-cd D:\Agent_project\CodeX\temporary_job\cloud_data\big_project\cloud-bigdata-rag-assistant\backend
-C:\Users\19866\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+cd backend
+<python.exe 的实际路径> -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
 启动后检查：
@@ -90,14 +90,12 @@ http://127.0.0.1:8000/health
 http://127.0.0.1:8000/docs
 ```
 
-注意：不要用 `http://127.0.0.1:8000/` 判断后端是否正常，当前健康检查入口是 `/health`。
-
 ## 5. 启动前端
 
-另开一个 PowerShell 窗口：
+另开一个 PowerShell 窗口，从项目根目录进入前端目录：
 
 ```powershell
-cd D:\Agent_project\CodeX\temporary_job\cloud_data\big_project\cloud-bigdata-rag-assistant\frontend
+cd frontend
 npm.cmd install
 npm.cmd run dev -- --host 127.0.0.1 --port 5173
 ```
@@ -110,26 +108,26 @@ http://127.0.0.1:5173
 
 如果 PowerShell 拦截 `npm`，使用 `npm.cmd`。
 
-## 6. 正确测试流程
+## 6. 测试流程
 
 1. 启动后端。
 2. 启动前端。
 3. 打开 `http://127.0.0.1:5173`。
-4. 进入上传页面。
-5. 上传 PDF、DOCX 或 TXT。
-6. 进入知识库页面。
-7. 找到刚上传的文档，点击“重建索引”。
-8. 等待状态变成 `processed`。
-9. 确认 `chunk_count > 0`。
-10. 进入智能问答页面。
-11. 输入问题，例如：`云计算的五个基本特征是什么？`
-12. 检查是否返回 answer、model、created_at 和 sources。
-13. 进入日志页面，确认有问答记录。
-14. 进入统计页面，确认 document_count、chunk_count、question_count 有变化。
+4. 上传 PDF、DOCX 或 TXT。
+5. 进入知识库页面。
+6. 点击“重建索引”。
+7. 等待状态变成 `processed`。
+8. 确认 `chunk_count > 0`。
+9. 进入智能问答页面。
+10. 输入课程相关问题。
+11. 检查是否返回 answer、model、created_at 和 sources。
+12. 进入日志页面，确认有问答记录。
+13. 进入统计页面，确认 document_count、chunk_count、question_count 有变化。
+14. 删除一个文档，确认知识库列表和 sources 不再引用该文档。
 
 ## 7. 常见问题
 
-### 前端 Network Error
+### 前端显示 Network Error
 
 优先检查：
 
@@ -162,23 +160,22 @@ VECTOR_INDEX_NOT_READY
 
 说明 `models/bge-small-zh-v1.5` 不存在，或者 `.env` 中路径写错。
 
-## 8. 可选检查命令
+## 8. 检查命令
 
 后端测试：
 
 ```powershell
-cd D:\Agent_project\CodeX\temporary_job\cloud_data\big_project\cloud-bigdata-rag-assistant
 python -m unittest discover -s backend\tests -p "test_*.py"
 ```
 
 前端构建：
 
 ```powershell
-cd D:\Agent_project\CodeX\temporary_job\cloud_data\big_project\cloud-bigdata-rag-assistant\frontend
+cd frontend
 npm.cmd run build
 ```
 
-## 删除文档验收
+## 9. 删除文档验收
 
 知识库页面删除文档时会调用：
 
@@ -186,6 +183,11 @@ npm.cmd run build
 DELETE /documents/{document_id}
 ```
 
-删除成功后，刷新知识库页面，该文档不应再出现。后端同时清理对应 chunks、原始上传文件、processed JSON，并用剩余 chunks 重建 FAISS。如果删除后没有任何可用 chunk，后端会清空 FAISS 文件，之后提问应提示 `VECTOR_INDEX_NOT_READY`。
+删除成功后：
 
-删除不存在的文档时，后端应返回统一失败 envelope，错误码为 `DOCUMENT_NOT_FOUND`，前端应显示后端 message，而不是只显示 Network Error。
+- `GET /documents` 不再返回该文档。
+- 后端清理对应 chunks、原始上传文件、processed JSON。
+- 后端用剩余 chunks 重建 FAISS。
+- 如果没有任何可用 chunk，后端会清空 FAISS 文件，之后提问应提示 `VECTOR_INDEX_NOT_READY`。
+
+删除不存在的文档时，后端返回统一失败 envelope，错误码为 `DOCUMENT_NOT_FOUND`。
